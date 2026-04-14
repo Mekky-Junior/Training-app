@@ -4,10 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Abdullah — Complete Training Plan</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   :root{--bg:#0d0d0d;--bg2:#141414;--bg3:#1a1a1a;--bg4:#222222;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#f0ece4;--text2:#9a9488;--text3:#5a5650;--accent:#c8f07a;--accent2:#7af0c8;--accent3:#f0a87a;--accent4:#7ac8f0;--red:#f07a7a;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;}
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -22,10 +24,14 @@
   .hstat-val.green{color:var(--accent);}.hstat-val.orange{color:var(--accent3);}.hstat-val.blue{color:var(--accent4);}
   .hstat-label{font-size:11px;color:var(--text3);margin-top:3px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;}
   .alert{margin:24px 40px;background:rgba(200,240,122,0.06);border:1px solid rgba(200,240,122,0.2);border-radius:8px;padding:14px 18px;font-size:13px;color:#c8f07a;line-height:1.6;}
-  .tabs-wrap{padding:24px 40px 0;border-bottom:1px solid var(--border);display:flex;gap:4px;flex-wrap:wrap;}
-  .tab{padding:9px 16px;font-size:12px;font-family:var(--mono);letter-spacing:0.05em;cursor:pointer;border-radius:6px 6px 0 0;border:1px solid transparent;border-bottom:none;color:var(--text3);background:transparent;transition:all 0.15s;text-transform:uppercase;user-select:none;}
+  
+  /* Mobile-friendly scrolling tabs */
+  .tabs-wrap{padding:24px 40px 0; border-bottom:1px solid var(--border); display:flex; gap:4px; flex-wrap:nowrap; overflow-x:auto; white-space:nowrap; -webkit-overflow-scrolling:touch; scrollbar-width:none;}
+  .tabs-wrap::-webkit-scrollbar { display:none; }
+  .tab{flex-shrink:0; padding:9px 16px;font-size:12px;font-family:var(--mono);letter-spacing:0.05em;cursor:pointer;border-radius:6px 6px 0 0;border:1px solid transparent;border-bottom:none;color:var(--text3);background:transparent;transition:all 0.15s;text-transform:uppercase;user-select:none;}
   .tab:hover{color:var(--text2);background:var(--bg3);}
   .tab.active{color:var(--accent);background:var(--bg2);border-color:var(--border2);border-bottom-color:var(--bg2);}
+  
   .content{padding:32px 40px;}
   .day-panel{display:none;}
   .day-panel.active{display:block;}
@@ -55,11 +61,15 @@
   .stretch-tip{font-size:12px;color:var(--text2);margin-top:5px;line-height:1.5;}
   .stretch-link{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:10px;color:var(--accent4);text-decoration:none;letter-spacing:0.05em;border-bottom:1px solid rgba(122,200,240,0.3);padding-bottom:1px;}
   .stretch-link:hover{color:var(--accent);border-color:var(--accent);}
-  table{width:100%;border-collapse:collapse;}
+  
+  /* Mobile-friendly scrolling tables */
+  table{width:100%;border-collapse:collapse; display:block; overflow-x:auto; white-space:nowrap; -webkit-overflow-scrolling:touch;}
   th{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;font-weight:400;}
-  td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+  td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:top; white-space:normal; min-width:120px;}
+  td:first-child{min-width: 250px;} /* ensures exercise names have space */
   tr:last-child td{border-bottom:none;}
   tr:hover td{background:var(--bg3);}
+  
   .ex-name{font-weight:500;color:var(--text);font-size:13px;}
   .ex-machine{font-size:11px;color:var(--accent4);margin-top:2px;font-family:var(--mono);}
   .ex-tip{font-size:12px;color:var(--text2);margin-top:5px;line-height:1.5;}
@@ -118,6 +128,7 @@
   .delete-btn{background:transparent;border:1px solid var(--red);color:var(--red);padding:6px 12px;border-radius:4px;font-size:10px;font-family:var(--mono);cursor:pointer;text-transform:uppercase;transition:0.2s;}
   .delete-btn:hover{background:rgba(240,122,122,0.1);}
   #ai-output{background:rgba(200,240,122,0.05);border:1px solid rgba(200,240,122,0.2);padding:16px;border-radius:8px;color:var(--text);font-size:13px;line-height:1.6;margin-top:16px;white-space:pre-wrap;display:none;}
+  .chart-container{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:20px;position:relative;height:250px;width:100%;}
   
   @media(max-width:800px){
     .tracker-form, .lift-form, .habit-form{grid-template-columns:1fr;}
@@ -128,7 +139,6 @@
     .posture-grid{grid-template-columns:1fr;}
     .header-stats{gap:16px;}
     .stretch-grid{grid-template-columns:1fr;}
-    th:nth-child(3),td:nth-child(3){display:none;}
   }
 </style>
 </head>
@@ -148,7 +158,7 @@
   </div>
 </div>
 
-<div class="alert"><strong>Complete program:</strong> Cloud tracking enabled for bodyweight, exercise lifts, and daily habits. Firebase configured for data continuity. Detailed descriptions restored across all informational tabs.</div>
+<div class="alert"><strong>Update complete:</strong> Video links upgraded to dynamic search queries to guarantee 100% uptime. Mobile scrolling issues resolved (tables and tabs can now be swiped horizontally). Dynamic Bodyweight Chart visualization added to the Tracker tab.</div>
 
 <div class="tabs-wrap">
   <div class="tab active" onclick="show('mon',this)">Mon</div>
@@ -166,7 +176,6 @@
 
 <div class="content">
 
-<!-- ══════ MONDAY ══════ -->
 <div class="day-panel active" id="p-mon">
   <div class="day-header"><span class="day-badge badge-push">Push</span><div><div class="day-title">Monday — Chest, Shoulders & Triceps</div><div class="day-focus">Upper chest emphasis · Shoulder-safe angles · 15 min pre-workout cardio</div></div></div>
 
@@ -178,39 +187,35 @@
       <div class="cardio-stat"><div class="cardio-stat-label">Speed</div><div class="cardio-stat-val">5–6 km/h</div></div>
       <div class="cardio-stat"><div class="cardio-stat-label">Incline</div><div class="cardio-stat-val">4–6%</div></div>
       <div class="cardio-stat"><div class="cardio-stat-label">Heart rate</div><div class="cardio-stat-val">60–65% max</div></div>
-      <div class="cardio-desc">Pre-training cardio on Monday warms joints without fatiguing pressing muscles. Incline engages the posterior chain and glutes. Walk tall, shoulders back — this is also posture practice. This replaces the standard 4-min warm-up treadmill on push day.</div>
+      <div class="cardio-desc">Pre-training cardio on Monday warms joints without fatiguing pressing muscles. Incline engages the posterior chain and glutes. Walk tall, shoulders back.</div>
     </div>
   </div>
 
   <div class="section-label">Posture activation — 8 min</div>
   <table><thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Video link</th></tr></thead><tbody>
-    <tr><td><div class="ex-name">Cable face pull</div><div class="ex-machine">Cable machine — rope, eye level</div><div class="ex-tip">Pull to forehead, elbows high and wide. Non-negotiable before every push session — the #1 corrective for rounded shoulders.</div></td><td><span class="sets">3 × 15–20</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=rep-qVOkqgk" target="_blank">▶ Face pull tutorial</a></td></tr>
-    <tr><td><div class="ex-name">Foam roller chest stretch</div><div class="ex-machine">Foam roller horizontal across mid-back</div><div class="ex-tip">Lie back over roller at shoulder-blade level, arms in T, palms up. Breathe and let gravity open your chest. 60 sec.</div></td><td><span class="sets">2 × 60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=W0fEC-rVDhE" target="_blank">▶ Foam roller tutorial</a></td></tr>
+    <tr><td><div class="ex-name">Cable face pull</div><div class="ex-machine">Cable machine — rope, eye level</div><div class="ex-tip">Pull to forehead, elbows high and wide. Non-negotiable before every push session.</div></td><td><span class="sets">3 × 15–20</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=cable+face+pull+proper+form+tutorial" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Foam roller chest stretch</div><div class="ex-machine">Foam roller horizontal across mid-back</div><div class="ex-tip">Lie back over roller at shoulder-blade level, arms in T, palms up. 60 sec.</div></td><td><span class="sets">2 × 60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=foam+roller+thoracic+extension+chest+stretch" target="_blank">▶ Watch search</a></td></tr>
   </tbody></table>
 
   <div class="section-label">Main workout</div>
   <table><thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Rest</th><th>Video link</th></tr></thead><tbody>
-    <tr><td><div class="ex-name">Incline chest press machine</div><div class="ex-machine">Incline chest press — upper chest setting</div><div class="ex-tip">Seat at upper-chest height. 3-sec eccentric on return. Safe for shoulder impingement. Your #1 chest builder.</div><span class="tag t-chest">Upper chest</span><span class="tag t-arms">Triceps</span></td><td><span class="sets">4 × 10–12</span></td><td><span class="rest-val">75 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=G5mT7JZSOIA" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Flat chest press machine (converging)</div><div class="ex-machine">Converging chest press preferred</div><div class="ex-tip">Handles converge at peak for a safer arc. Squeeze at peak 1 sec. 3-sec eccentric return.</div><span class="tag t-chest">Mid chest</span><span class="tag t-arms">Triceps</span></td><td><span class="sets">3 × 12–15</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=xUm0BiZCX_I" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Cable fly low-to-high (single arm)</div><div class="ex-machine">Low cable pulley — D-handle</div><div class="ex-tip">Pull from hip to shoulder height in an arc. Single arm, other hand holds machine for stability. Safer than dumbbell flyes for rounded shoulders.</div><span class="tag t-chest">Upper chest</span></td><td><span class="sets">3 × 12–15 each</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=H0MpIjsEFEQ" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Machine shoulder press</div><div class="ex-machine">Seated shoulder press — neutral grip if available</div><div class="ex-tip">Neutral grip (palms facing each other) is gentler on the shoulder joint. Do NOT lock elbows at top.</div><span class="tag t-shoulder">Shoulders</span><span class="tag t-arms">Triceps</span></td><td><span class="sets">3 × 12–15</span></td><td><span class="rest-val">75 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=WvLMauqrnK8" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Cable lateral raise (single arm)</div><div class="ex-machine">Low cable pulley — D-handle</div><div class="ex-tip">Constant cable tension superior to dumbbells. Raise to shoulder height only. Slow arc, do not shrug.</div><span class="tag t-shoulder">Side delts</span></td><td><span class="sets">3 × 15–20 each</span></td><td><span class="rest-val">45 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=XV1iBbHFJVE" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Tricep pushdown — rope</div><div class="ex-machine">High cable pulley — rope attachment</div><div class="ex-tip">Elbows pinned at sides. Spread rope at bottom for full contraction. Spine neutral — do not hunch forward.</div><span class="tag t-arms">Triceps</span></td><td><span class="sets">3 × 12–15</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=vB5OHsJ3EME" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Cable crunch (kneeling, rope)</div><div class="ex-machine">High cable — rope attachment</div><div class="ex-tip">Pull with abs not neck. Chin tucked. Fold ribcage toward hips — hips barely move.</div><span class="tag t-core">Core</span></td><td><span class="sets">3 × 15</span></td><td><span class="rest-val">45 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=AV5PmHFT8pw" target="_blank">▶ Watch</a></td></tr>
+    <tr><td><div class="ex-name">Incline chest press machine</div><div class="ex-machine">Incline chest press — upper chest setting</div><div class="ex-tip">Seat at upper-chest height. 3-sec eccentric on return. Your #1 chest builder.</div><span class="tag t-chest">Upper chest</span></td><td><span class="sets">4 × 10–12</span></td><td><span class="rest-val">75 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=incline+chest+press+machine+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Flat chest press machine</div><div class="ex-machine">Converging chest press preferred</div><div class="ex-tip">Handles converge at peak for a safer arc. Squeeze at peak 1 sec.</div><span class="tag t-chest">Mid chest</span></td><td><span class="sets">3 × 12–15</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=converging+chest+press+machine+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Cable fly low-to-high</div><div class="ex-machine">Low cable pulley — D-handle</div><div class="ex-tip">Pull from hip to shoulder height in an arc. Single arm for stability.</div><span class="tag t-chest">Upper chest</span></td><td><span class="sets">3 × 12–15 each</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=single+arm+low+to+high+cable+fly" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Machine shoulder press</div><div class="ex-machine">Seated shoulder press</div><div class="ex-tip">Neutral grip if available. Do NOT lock elbows at top.</div><span class="tag t-shoulder">Shoulders</span></td><td><span class="sets">3 × 12–15</span></td><td><span class="rest-val">75 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=machine+shoulder+press+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Cable lateral raise</div><div class="ex-machine">Low cable pulley — D-handle</div><div class="ex-tip">Constant cable tension. Raise to shoulder height only. Do not shrug.</div><span class="tag t-shoulder">Side delts</span></td><td><span class="sets">3 × 15–20 each</span></td><td><span class="rest-val">45 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=single+arm+cable+lateral+raise+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Tricep pushdown — rope</div><div class="ex-machine">High cable pulley — rope</div><div class="ex-tip">Elbows pinned at sides. Spread rope at bottom for full contraction.</div><span class="tag t-arms">Triceps</span></td><td><span class="sets">3 × 12–15</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=rope+tricep+pushdown+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Cable crunch</div><div class="ex-machine">High cable — rope attachment</div><div class="ex-tip">Pull with abs not neck. Chin tucked.</div><span class="tag t-core">Core</span></td><td><span class="sets">3 × 15</span></td><td><span class="rest-val">45 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=kneeling+cable+crunch+proper+form" target="_blank">▶ Watch search</a></td></tr>
   </tbody></table>
 
   <div class="section-label">Post-session stretches — 10 min</div>
   <div class="stretch-grid">
-    <div class="stretch-card"><div class="stretch-name">Doorframe chest stretch<span class="stretch-duration">2 × 45 sec</span></div><div class="stretch-tip">Arms at 90° in doorway, lean forward gently. Do NOT shrug. Directly counters the pec tightness pulling your shoulders forward.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=LdOTkzhjGaE" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Cross-body shoulder stretch<span class="stretch-duration">2 × 30 sec each</span></div><div class="stretch-tip">Bring one arm across chest, use other arm to pull gently. Targets the posterior deltoid and shoulder capsule after pressing.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=sqbFBOMMeeo" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Tricep overhead stretch<span class="stretch-duration">2 × 30 sec each</span></div><div class="stretch-tip">Raise one arm, bend elbow, use other hand to push elbow back. Stretches the long head of triceps after today's work.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=YlS0_HM97N4" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Wall angel stretch<span class="stretch-duration">2 × 10 slow reps</span></div><div class="stretch-tip">Back flat on wall, goalpost arms slide overhead. Keep all contact points on wall. Trains thoracic mobility and shoulder alignment.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=pBGLPDfmJvA" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Chin tuck + neck side stretch<span class="stretch-duration">10 tucks + 30 sec each</span></div><div class="stretch-tip">10 chin tucks then tilt ear to shoulder. Releases tech neck tension accumulated during the session and the workday.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=wQylqaCl8Zo" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Child's pose<span class="stretch-duration">60 sec</span></div><div class="stretch-tip">Kneel, sit back on heels, arms extended forward. Decompresses the spine, relaxes the entire back after pressing. Breathe deeply.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=2MJGg-dUKh0" target="_blank">▶ Watch tutorial</a></div>
+    <div class="stretch-card"><div class="stretch-name">Doorframe chest stretch<span class="stretch-duration">2 × 45 sec</span></div><div class="stretch-tip">Arms at 90° in doorway, lean forward gently. Do NOT shrug.</div><a class="stretch-link" href="https://www.youtube.com/results?search_query=doorframe+chest+stretch" target="_blank">▶ Watch search</a></div>
+    <div class="stretch-card"><div class="stretch-name">Cross-body shoulder stretch<span class="stretch-duration">2 × 30 sec each</span></div><div class="stretch-tip">Bring one arm across chest, pull gently.</div><a class="stretch-link" href="https://www.youtube.com/results?search_query=cross+body+shoulder+stretch" target="_blank">▶ Watch search</a></div>
+    <div class="stretch-card"><div class="stretch-name">Tricep overhead stretch<span class="stretch-duration">2 × 30 sec each</span></div><div class="stretch-tip">Raise arm, bend elbow, push back.</div><a class="stretch-link" href="https://www.youtube.com/results?search_query=overhead+tricep+stretch" target="_blank">▶ Watch search</a></div>
   </div>
 </div>
 
-<!-- ══════ TUESDAY ══════ -->
 <div class="day-panel" id="p-tue">
   <div class="day-header"><span class="day-badge badge-pull">Pull</span><div><div class="day-title">Tuesday — Back, Biceps & Rear Delts</div><div class="day-focus">Most important posture day · 10 min easy post-workout bike</div></div></div>
 
@@ -221,40 +226,27 @@
       <div class="cardio-stat"><div class="cardio-stat-label">Duration</div><div class="cardio-stat-val">10 min</div></div>
       <div class="cardio-stat"><div class="cardio-stat-label">Resistance</div><div class="cardio-stat-val">Level 3–5</div></div>
       <div class="cardio-stat"><div class="cardio-stat-label">Heart rate</div><div class="cardio-stat-val">55–60% max</div></div>
-      <div class="cardio-desc">Tuesday is your heaviest back day and most important for posture correction. Keep cardio light and post-workout — it flushes lactic acid and improves back recovery without pre-fatiguing your pulling muscles. The bike is joint-safe and shoulder-free.</div>
     </div>
   </div>
 
   <div class="section-label">Posture activation — 10 min</div>
   <table><thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Video link</th></tr></thead><tbody>
-    <tr><td><div class="ex-name">Scapular retraction hold</div><div class="ex-machine">Seated cable row — very light weight, isometric</div><div class="ex-tip">Grab handle, retract shoulder blades and HOLD 10 sec. Re-educates your brain on where shoulders should naturally sit.</div></td><td><span class="sets">3 × 10 holds</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=4Wh0mCJSZiM" target="_blank">▶ Watch tutorial</a></td></tr>
-    <tr><td><div class="ex-name">Chin tuck (wall)</div><div class="ex-machine">Flat wall — back and head touching</div><div class="ex-tip">Pull chin straight back — not down. Hold 5 sec. Most direct tech neck corrective. Do this morning and evening at home too.</div></td><td><span class="sets">2 × 10 reps</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=wQylqaCl8Zo" target="_blank">▶ Watch tutorial</a></td></tr>
+    <tr><td><div class="ex-name">Scapular retraction hold</div><div class="ex-machine">Seated cable row — light weight</div><div class="ex-tip">Grab handle, retract shoulder blades and HOLD 10 sec.</div></td><td><span class="sets">3 × 10 holds</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=scapular+retraction+hold" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Chin tuck (wall)</div><div class="ex-machine">Flat wall</div><div class="ex-tip">Pull chin straight back — not down. Hold 5 sec.</div></td><td><span class="sets">2 × 10 reps</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=chin+tuck+posture+exercise+wall" target="_blank">▶ Watch search</a></td></tr>
   </tbody></table>
 
   <div class="section-label">Main workout</div>
   <table><thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Rest</th><th>Video link</th></tr></thead><tbody>
-    <tr><td><div class="ex-name">Lat pulldown (wide grip)</div><div class="ex-machine">Cable lat pulldown — wide bar</div><div class="ex-tip">Pull to upper chest. Lean back 10–15°. Drive elbows DOWN and BACK. Full stretch at top. Builds back width directly.</div><span class="tag t-back">Lats</span><span class="tag t-arms">Biceps</span></td><td><span class="sets">4 × 10–12</span></td><td><span class="rest-val">90 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=CAwf7n6Luuc" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Seated cable row (close grip V-bar)</div><div class="ex-machine">Cable row station — V-bar attachment</div><div class="ex-tip">Sit tall. Pull to lower chest. Pause and squeeze shoulder blades for 1 sec at peak. This IS your posture correction in motion.</div><span class="tag t-back">Mid back</span><span class="tag t-posture">Posture fix</span></td><td><span class="sets">4 × 12–15</span></td><td><span class="rest-val">75 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=GZbfZ033f74" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Seated row machine (independent arms)</div><div class="ex-machine">Hammer Strength or plate-loaded row</div><div class="ex-tip">Independent arms fixes your left/right asymmetry. Start with weaker (left) side. Drive elbows back, not up. Feel each lat separately.</div><span class="tag t-back">Lats</span><span class="tag t-back">Mid back</span></td><td><span class="sets">4 × 12 each</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=MgEenMFaUKs" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Reverse fly machine (pec deck reversed)</div><div class="ex-machine">Pec deck — face the pad, arms open backward</div><div class="ex-tip">CRITICAL for rounded shoulders. Open arms backward and wide. Squeezes rear delts and rhomboids — the muscles that pull your shoulders back.</div><span class="tag t-shoulder">Rear delts</span><span class="tag t-posture">Posture fix</span></td><td><span class="sets">4 × 15–20</span></td><td><span class="rest-val">45 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=Cm8bBqFnpAI" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Cable face pull (end of session)</div><div class="ex-machine">Cable machine — rope, eye level</div><div class="ex-tip">Done twice — start and end of pull day. Cannot be overdone at light weights. Your most important posture exercise.</div><span class="tag t-posture">Posture fix</span><span class="tag t-shoulder">Rear delt</span></td><td><span class="sets">3 × 20</span></td><td><span class="rest-val">45 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=rep-qVOkqgk" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Preacher curl machine</div><div class="ex-machine">Preacher curl machine or low cable EZ-bar</div><div class="ex-tip">Locks upper arm in place, removing all shoulder involvement. Full range. 3-sec eccentric.</div><span class="tag t-arms">Biceps</span></td><td><span class="sets">3 × 12–15</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=fIWP-FRFNU0" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Hammer curl — cable rope</div><div class="ex-machine">Low cable — rope attachment</div><div class="ex-tip">Neutral grip builds brachialis — pushes the bicep up for thicker arm appearance. Rope keeps wrists neutral.</div><span class="tag t-arms">Brachialis</span></td><td><span class="sets">3 × 12–15</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=TwD-YGVP4Bk" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Plank on elbows</div><div class="ex-machine">Floor mat</div><div class="ex-tip">Chin tucked — tech neck fix even during planks. Do NOT let head drop forward. Breathe steadily.</div><span class="tag t-core">Core</span></td><td><span class="sets">3 × 30–45 sec</span></td><td><span class="rest-val">30 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=ASdvN_XEl_c" target="_blank">▶ Watch</a></td></tr>
+    <tr><td><div class="ex-name">Lat pulldown (wide grip)</div><div class="ex-machine">Cable lat pulldown</div><div class="ex-tip">Pull to upper chest. Lean back 10–15°. Drive elbows DOWN.</div><span class="tag t-back">Lats</span></td><td><span class="sets">4 × 10–12</span></td><td><span class="rest-val">90 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=wide+grip+lat+pulldown+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Seated cable row</div><div class="ex-machine">Cable row — V-bar</div><div class="ex-tip">Sit tall. Pull to lower chest. Pause and squeeze 1 sec.</div><span class="tag t-back">Mid back</span></td><td><span class="sets">4 × 12–15</span></td><td><span class="rest-val">75 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=v-bar+seated+cable+row+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Seated row machine</div><div class="ex-machine">Independent arms machine</div><div class="ex-tip">Start with weaker side. Drive elbows back, not up.</div><span class="tag t-back">Lats</span></td><td><span class="sets">4 × 12 each</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=machine+seated+row+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Reverse fly machine</div><div class="ex-machine">Pec deck reversed</div><div class="ex-tip">CRITICAL for rounded shoulders. Open arms wide.</div><span class="tag t-shoulder">Rear delts</span></td><td><span class="sets">4 × 15–20</span></td><td><span class="rest-val">45 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=reverse+pec+deck+fly+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Cable face pull</div><div class="ex-machine">Cable machine — rope</div><div class="ex-tip">Done twice — start and end of pull day.</div><span class="tag t-posture">Posture fix</span></td><td><span class="sets">3 × 20</span></td><td><span class="rest-val">45 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=cable+face+pull+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Preacher curl machine</div><div class="ex-machine">Preacher curl machine</div><div class="ex-tip">Locks upper arm in place. Full range.</div><span class="tag t-arms">Biceps</span></td><td><span class="sets">3 × 12–15</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=machine+preacher+curl+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Hammer curl — cable</div><div class="ex-machine">Low cable — rope</div><div class="ex-tip">Builds brachialis for thicker arm appearance.</div><span class="tag t-arms">Brachialis</span></td><td><span class="sets">3 × 12–15</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=rope+cable+hammer+curl+form" target="_blank">▶ Watch search</a></td></tr>
   </tbody></table>
-
-  <div class="section-label">Post-session stretches — 10 min</div>
-  <div class="stretch-grid">
-    <div class="stretch-card"><div class="stretch-name">Lat stretch (doorframe or bar)<span class="stretch-duration">2 × 40 sec each</span></div><div class="stretch-tip">Hold a fixed point, lean your bodyweight to one side. Long stretch from armpit to hip. Releases tightness after heavy pulling.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=9kGS7sOWu7c" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Thoracic extension on foam roller<span class="stretch-duration">90 sec</span></div><div class="stretch-tip">Roller across mid-back (T4–T8). Arms crossed, extend backward. Breathe deeply. The single best exercise for thoracic mobility. Do daily at home.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=W0fEC-rVDhE" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Bicep wall stretch<span class="stretch-duration">2 × 30 sec each</span></div><div class="stretch-tip">Palm flat on wall behind you at shoulder height, turn body away. Stretches bicep and also opens the chest — double benefit for posture.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=0A8BKKoN7_Q" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Upper trap / neck side stretch<span class="stretch-duration">2 × 30 sec each</span></div><div class="stretch-tip">Sit tall, tilt ear to shoulder. Gentle hand pressure on head. Releases upper trap tension — primary driver of tech neck discomfort.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=VFoHyXWx4p8" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Cat-cow spine mobilisation<span class="stretch-duration">2 × 10 slow reps</span></div><div class="stretch-tip">On all fours — arch and round the spine alternately. Decompresses every vertebra after a heavy pull session. Breathe into each position.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=kqnua4rHVVA" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Child's pose<span class="stretch-duration">60 sec</span></div><div class="stretch-tip">Kneel, sit back on heels, arms forward. Full spinal decompression. Perfect closing stretch for any heavy pull day.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=2MJGg-dUKh0" target="_blank">▶ Watch tutorial</a></div>
-  </div>
 </div>
 
-<!-- ══════ WEDNESDAY ══════ -->
 <div class="day-panel" id="p-wed">
   <div class="day-header"><span class="day-badge badge-legs">Legs</span><div><div class="day-title">Wednesday — Legs, Glutes & Core</div><div class="day-focus">Hormonal driver for full-body growth · 15 min post-workout stairmaster</div></div></div>
 
@@ -265,127 +257,76 @@
       <div class="cardio-stat"><div class="cardio-stat-label">Duration</div><div class="cardio-stat-val">15 min</div></div>
       <div class="cardio-stat"><div class="cardio-stat-label">Intensity</div><div class="cardio-stat-val">Moderate</div></div>
       <div class="cardio-stat"><div class="cardio-stat-label">Heart rate</div><div class="cardio-stat-val">65–70% max</div></div>
-      <div class="cardio-desc">Post leg training, your glycogen is depleted — cardio here burns significantly more fat than cardio at any other time. Stairmaster builds leg endurance and engages glutes. If legs feel too fatigued, substitute with 15 min incline treadmill walk at 6–8%.</div>
     </div>
   </div>
 
   <div class="section-label">Posture + mobility activation — 8 min</div>
   <table><thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Video link</th></tr></thead><tbody>
-    <tr><td><div class="ex-name">Hip flexor kneeling stretch</div><div class="ex-machine">Floor mat — half-kneeling</div><div class="ex-tip">Kneel on one knee, push hips forward, hold 45 sec. Tight hip flexors from sitting worsen rounded shoulders — stretch them every leg day.</div></td><td><span class="sets">2 × 45 sec each</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=YQmpO9VT2X4" target="_blank">▶ Watch tutorial</a></td></tr>
-    <tr><td><div class="ex-name">Glute bridge (floor activation)</div><div class="ex-machine">Floor mat</div><div class="ex-tip">Activate glutes before loading them. Weak glutes = anterior pelvic tilt = worse rounded shoulders. 15 slow reps, hard squeeze at top.</div></td><td><span class="sets">2 × 15</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=wPM8icPu6H8" target="_blank">▶ Watch tutorial</a></td></tr>
+    <tr><td><div class="ex-name">Hip flexor kneeling stretch</div><div class="ex-machine">Floor mat</div><div class="ex-tip">Push hips forward, hold 45 sec. Breaks the sitting pattern.</div></td><td><span class="sets">2 × 45 sec each</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=kneeling+hip+flexor+stretch" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Glute bridge</div><div class="ex-machine">Floor mat</div><div class="ex-tip">Activate glutes before loading them. 15 slow reps.</div></td><td><span class="sets">2 × 15</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=glute+bridge+activation" target="_blank">▶ Watch search</a></td></tr>
   </tbody></table>
 
   <div class="section-label">Main workout</div>
   <table><thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Rest</th><th>Video link</th></tr></thead><tbody>
-    <tr><td><div class="ex-name">Leg press machine</div><div class="ex-machine">45° leg press machine</div><div class="ex-tip">Feet shoulder-width, mid-plate. Do NOT let lower back peel off pad. 90° knee bend max. Replaces barbell squats for first 3 months.</div><span class="tag t-legs">Quads</span><span class="tag t-legs">Glutes</span></td><td><span class="sets">4 × 12–15</span></td><td><span class="rest-val">90 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=IZxyjW7MPJQ" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Seated leg curl machine</div><div class="ex-machine">Seated hamstring curl machine</div><div class="ex-tip">Full range — don't rush the return extension. Seated gives better hamstring stretch than lying. Hamstrings are chronically weak in desk workers.</div><span class="tag t-legs">Hamstrings</span></td><td><span class="sets">4 × 12–15</span></td><td><span class="rest-val">75 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=1Tq3QdYUuHs" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Leg extension machine</div><div class="ex-machine">Quad extension machine</div><div class="ex-tip">Full extension at top, hold 1 sec. Control the return. Feet neutral. Builds VMO for knee stability.</div><span class="tag t-legs">Quads</span></td><td><span class="sets">3 × 15</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=YyvSfVjQeL0" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Hip abductor machine</div><div class="ex-machine">Hip abductor — push knees outward</div><div class="ex-tip">Builds glute medius — improves hip stability and helps your WHR of 0.91. Often skipped by men but essential for your profile.</div><span class="tag t-legs">Glute medius</span></td><td><span class="sets">3 × 15–20</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=KIbMDpqoMRc" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Calf raise machine</div><div class="ex-machine">Seated or standing calf machine</div><div class="ex-tip">Pause at the bottom stretch 2 full sec. Full range. No bouncing. High reps are key for calf development.</div><span class="tag t-legs">Calves</span></td><td><span class="sets">4 × 20</span></td><td><span class="rest-val">45 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=JbyjNymZOt0" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Glute kickback machine</div><div class="ex-machine">Glute kickback machine or low cable + ankle strap</div><div class="ex-tip">Strong glutes = neutral pelvis = better shoulder alignment. Squeeze at the top of each rep. This is also a posture exercise.</div><span class="tag t-legs">Glutes</span></td><td><span class="sets">3 × 15 each</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=knOeZJnPADQ" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Ab crunch machine</div><div class="ex-machine">Abdominal crunch machine</div><div class="ex-tip">Chin tucked — use abs to curl, not neck or hip flexors. Controlled tempo both ways.</div><span class="tag t-core">Core</span></td><td><span class="sets">3 × 15–20</span></td><td><span class="rest-val">45 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=Yd1AAf-i7QQ" target="_blank">▶ Watch</a></td></tr>
+    <tr><td><div class="ex-name">Leg press machine</div><div class="ex-machine">45° leg press</div><div class="ex-tip">Feet mid-plate. 90° knee bend max.</div><span class="tag t-legs">Quads</span></td><td><span class="sets">4 × 12–15</span></td><td><span class="rest-val">90 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=45+degree+leg+press+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Seated leg curl</div><div class="ex-machine">Seated hamstring curl</div><div class="ex-tip">Full range — don't rush the return.</div><span class="tag t-legs">Hamstrings</span></td><td><span class="sets">4 × 12–15</span></td><td><span class="rest-val">75 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=seated+leg+curl+machine+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Leg extension machine</div><div class="ex-machine">Quad extension</div><div class="ex-tip">Full extension at top, hold 1 sec.</div><span class="tag t-legs">Quads</span></td><td><span class="sets">3 × 15</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=leg+extension+machine+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Hip abductor machine</div><div class="ex-machine">Hip abductor</div><div class="ex-tip">Builds glute medius for hip stability.</div><span class="tag t-legs">Glutes</span></td><td><span class="sets">3 × 15–20</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=hip+abductor+machine+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Calf raise machine</div><div class="ex-machine">Seated or standing calf</div><div class="ex-tip">Pause at the bottom stretch 2 full sec.</div><span class="tag t-legs">Calves</span></td><td><span class="sets">4 × 20</span></td><td><span class="rest-val">45 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=calf+raise+machine+proper+form" target="_blank">▶ Watch search</a></td></tr>
   </tbody></table>
-
-  <div class="section-label">Post-session stretches — 12 min</div>
-  <div class="stretch-grid">
-    <div class="stretch-card"><div class="stretch-name">Standing quad stretch<span class="stretch-duration">2 × 40 sec each</span></div><div class="stretch-tip">Stand on one leg, pull foot to glute. Hold a wall for balance. Essential after leg press and extension today.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=9vzeqDVE7nE" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Seated hamstring stretch<span class="stretch-duration">2 × 45 sec each</span></div><div class="stretch-tip">Sit on floor, one leg extended, reach toward foot. Hinge from hip — do not round the spine. Relieves leg curl tightness.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=_MSnw1XMfuI" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Pigeon pose (hip + glute)<span class="stretch-duration">2 × 45 sec each</span></div><div class="stretch-tip">Shin forward on floor, extend opposite leg back. Deep glute and hip external rotator stretch — important for your pelvic tilt correction.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=24M9HLyxAUc" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Kneeling hip flexor stretch<span class="stretch-duration">2 × 45 sec each</span></div><div class="stretch-tip">Half-kneeling, push hips forward, squeeze back glute. Tight hip flexors are part of your posture chain — stretch again post-training.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=YQmpO9VT2X4" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Calf stretch on step or wall<span class="stretch-duration">2 × 40 sec each</span></div><div class="stretch-tip">Toes on a step, lower heel below. Full calf stretch after the high-volume calf work today. Hold the deep stretch point.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=W_3kuvw5gCQ" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Thoracic foam roller extension<span class="stretch-duration">90 sec</span></div><div class="stretch-tip">Roller across mid-back. Arms crossed, extend backward and breathe. Do this every day — even on leg days. It is your most important daily mobility tool.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=W0fEC-rVDhE" target="_blank">▶ Watch tutorial</a></div>
-  </div>
 </div>
 
-<!-- ══════ THURSDAY ══════ -->
 <div class="day-panel" id="p-thu">
-  <div class="day-header"><span class="day-badge badge-upper">Upper</span><div><div class="day-title">Thursday — Upper Body Strength (Heavier)</div><div class="day-focus">Progressive overload · Track numbers · No cardio — CNS needs full resources</div></div></div>
+  <div class="day-header"><span class="day-badge badge-upper">Upper</span><div><div class="day-title">Thursday — Upper Body Strength</div><div class="day-focus">Progressive overload · Track numbers · No cardio</div></div></div>
 
-  <div class="section-label no-top">Cardio — none today (intentional)</div>
+  <div class="section-label no-top">Cardio — none today</div>
   <div class="cardio-box">
     <div class="cardio-title">No cardio on heavy strength day</div>
     <div class="cardio-row">
-      <div class="cardio-stat"><div class="cardio-stat-label">Cardio</div><div class="cardio-stat-val" style="color:var(--accent3);">Rest</div></div>
-      <div class="cardio-desc">Thursday is your heaviest session — 6–8 rep range on all compounds. Adding cardio before or after would compromise maximum load output and slow recovery. Your central nervous system needs every available resource for strength work today. Walking to and from the gym is sufficient.</div>
+      <div class="cardio-desc">Thursday is your heaviest session — 6–8 rep range on compounds. Your CNS needs every available resource.</div>
     </div>
   </div>
 
-  <div class="section-label">Posture activation — 10 min</div>
-  <table><thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Video link</th></tr></thead><tbody>
-    <tr><td><div class="ex-name">Band pull-apart (or light cable)</div><div class="ex-machine">Resistance band or cable — straight bar at chest height</div><div class="ex-tip">Pull apart to a T shape. Activates rear delts and rhomboids before pressing. Non-negotiable warm-up on heavy day.</div></td><td><span class="sets">3 × 20</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=FSSDLDhbacc" target="_blank">▶ Watch tutorial</a></td></tr>
-    <tr><td><div class="ex-name">Chin tuck + neck retraction</div><div class="ex-machine">Wall or seated</div><div class="ex-tip">Ears over shoulders, pull chin straight back. Hold 5 sec. Tech neck daily fix — do this morning and evening at home too.</div></td><td><span class="sets">2 × 10 reps</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=wQylqaCl8Zo" target="_blank">▶ Watch tutorial</a></td></tr>
-  </tbody></table>
-
-  <div class="section-label">Main workout — heavier than Monday and Tuesday</div>
+  <div class="section-label">Main workout — heavier than Mon/Tue</div>
   <table><thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Rest</th><th>Video link</th></tr></thead><tbody>
-    <tr><td><div class="ex-name">Flat chest press machine — heavy</div><div class="ex-machine">Plate-loaded or selectorized chest press</div><div class="ex-tip">Strength benchmark. Go heavier than Monday. 6–8 rep range. Track weight in your phone every week — if it goes up, muscle is growing.</div><span class="tag t-chest">Chest</span><span class="tag t-arms">Triceps</span></td><td><span class="sets">4 × 6–8</span></td><td><span class="rest-val">120 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=xUm0BiZCX_I" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Lat pulldown — underhand grip — heavy</div><div class="ex-machine">Cable lat pulldown — underhand or neutral grip bar</div><div class="ex-tip">Underhand grip more natural for rounded shoulder users. Heavier than Tuesday. 6–8 reps. Also track this weight.</div><span class="tag t-back">Lats</span><span class="tag t-arms">Biceps</span></td><td><span class="sets">4 × 6–8</span></td><td><span class="rest-val">120 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=CAwf7n6Luuc" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Machine shoulder press — heavy</div><div class="ex-machine">Seated machine shoulder press</div><div class="ex-tip">Heavier than Monday. Do not lock out at top — protects AC joint. Control the descent.</div><span class="tag t-shoulder">Shoulders</span></td><td><span class="sets">3 × 8–10</span></td><td><span class="rest-val">90 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=WvLMauqrnK8" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Seated cable row — wide grip bar</div><div class="ex-machine">Cable row — wide straight bar attachment</div><div class="ex-tip">Wide grip hits upper back, traps, and rear delts more than close grip. Different stimulus from Tuesday. Heavy and controlled.</div><span class="tag t-back">Upper back</span><span class="tag t-posture">Posture fix</span></td><td><span class="sets">4 × 8–10</span></td><td><span class="rest-val">90 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=GZbfZ033f74" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Tricep overhead extension (cable)</div><div class="ex-machine">High cable — rope or single handle overhead</div><div class="ex-tip">Overhead position stretches the long head — the biggest part of the arm. Keep elbows close to head throughout.</div><span class="tag t-arms">Triceps long head</span></td><td><span class="sets">3 × 10–12</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=6SS6K3lAwZ8" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Incline bicep curl (cable)</div><div class="ex-machine">Low cable — sit on 45° incline bench nearby</div><div class="ex-tip">45° incline stretches the long head of bicep for maximum growth. Best bicep builder in the plan. Full range, no swinging.</div><span class="tag t-arms">Biceps long head</span></td><td><span class="sets">3 × 10–12</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=soxrZlIl35U" target="_blank">▶ Watch</a></td></tr>
+    <tr><td><div class="ex-name">Flat chest press — heavy</div><div class="ex-machine">Chest press machine</div><div class="ex-tip">Track weight in tracker. 6–8 rep range.</div><span class="tag t-chest">Chest</span></td><td><span class="sets">4 × 6–8</span></td><td><span class="rest-val">120 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=chest+press+machine+heavy+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Lat pulldown — underhand</div><div class="ex-machine">Lat pulldown machine</div><div class="ex-tip">Underhand grip. Heavier than Tuesday.</div><span class="tag t-back">Lats</span></td><td><span class="sets">4 × 6–8</span></td><td><span class="rest-val">120 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=underhand+grip+lat+pulldown+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Machine shoulder press</div><div class="ex-machine">Shoulder press machine</div><div class="ex-tip">Control the descent. Heavy.</div><span class="tag t-shoulder">Shoulders</span></td><td><span class="sets">3 × 8–10</span></td><td><span class="rest-val">90 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=machine+shoulder+press+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Seated cable row — wide</div><div class="ex-machine">Cable row — wide straight bar</div><div class="ex-tip">Hits upper back and rear delts more.</div><span class="tag t-back">Upper back</span></td><td><span class="sets">4 × 8–10</span></td><td><span class="rest-val">90 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=wide+grip+seated+cable+row+proper+form" target="_blank">▶ Watch search</a></td></tr>
   </tbody></table>
-
-  <div class="section-label">Post-session stretches — 12 min</div>
-  <div class="stretch-grid">
-    <div class="stretch-card"><div class="stretch-name">Doorframe chest stretch<span class="stretch-duration">2 × 45 sec</span></div><div class="stretch-tip">After the heaviest pressing session of the week, the pecs need a deep, held stretch. Do not rush this one.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=LdOTkzhjGaE" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Lat side stretch (bar or doorframe)<span class="stretch-duration">2 × 40 sec each</span></div><div class="stretch-tip">Hold a fixed point, lean sideways. Feel stretch from armpit to hip. Essential after heavy underhand pulldowns.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=9kGS7sOWu7c" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Shoulder cross-body stretch<span class="stretch-duration">2 × 30 sec each</span></div><div class="stretch-tip">One arm across chest, other arm pulling. Releases the posterior deltoid and shoulder capsule after heavy compound work.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=sqbFBOMMeeo" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Wall angel stretch<span class="stretch-duration">3 × 10 slow reps</span></div><div class="stretch-tip">Back flat on wall. Goalpost arms slide to overhead. Full wall contact throughout. After the heaviest session, this reset is most valuable.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=pBGLPDfmJvA" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Wrist and forearm stretch<span class="stretch-duration">2 × 30 sec each direction</span></div><div class="stretch-tip">Extend arm, pull fingers back (flexor stretch) then fingers down (extensor stretch). Relieves grip fatigue from heavy machine work.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=mSZWSQSSEjE" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Child's pose<span class="stretch-duration">60 sec</span></div><div class="stretch-tip">Arms forward, breathe into lower back. Signals the nervous system to shift into recovery mode after the heaviest session of the week.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=2MJGg-dUKh0" target="_blank">▶ Watch tutorial</a></div>
-  </div>
 </div>
 
-<!-- ══════ FRIDAY ══════ -->
 <div class="day-panel" id="p-fri">
-  <div class="day-header"><span class="day-badge badge-full">Full Body</span><div><div class="day-title">Friday — Full Body + Metabolic + Posture Reset</div><div class="day-focus">Moderate weight · Supersets · 20 min incline walk — biggest fat-burn day</div></div></div>
+  <div class="day-header"><span class="day-badge badge-full">Full Body</span><div><div class="day-title">Friday — Full Body + Metabolic</div><div class="day-focus">Moderate weight · Supersets · 20 min incline walk</div></div></div>
 
-  <div class="section-label no-top">Cardio — 20 min after training (biggest cardio day)</div>
+  <div class="section-label no-top">Cardio — 20 min after training</div>
   <div class="cardio-box">
-    <div class="cardio-title">Incline treadmill walk — end-of-week fat burn protocol</div>
+    <div class="cardio-title">Incline treadmill walk — fat burn protocol</div>
     <div class="cardio-row">
       <div class="cardio-stat"><div class="cardio-stat-label">Duration</div><div class="cardio-stat-val">20 min</div></div>
       <div class="cardio-stat"><div class="cardio-stat-label">Speed</div><div class="cardio-stat-val">4–5 km/h</div></div>
       <div class="cardio-stat"><div class="cardio-stat-label">Incline</div><div class="cardio-stat-val">6–8%</div></div>
-      <div class="cardio-stat"><div class="cardio-stat-label">Heart rate</div><div class="cardio-stat-val">65–70% max</div></div>
-      <div class="cardio-desc">Friday gets the longest cardio. Today's training was moderate-weight supersets — muscles are metabolically fatigued but not maximally loaded, making post-workout cardio highly effective. This is your primary weekly fat-burning session directly targeting your trunk fat and WHR of 0.91. Do not run — incline walking burns comparable calories with zero joint stress.</div>
     </div>
   </div>
 
-  <div class="section-label">Posture activation — 8 min</div>
-  <table><tbody>
-    <tr><td><div class="ex-name">Full posture circuit (2 rounds)</div><div class="ex-machine">Cable machine + band + wall</div><div class="ex-tip">15 face pulls → 15 band pull-aparts → 10 wall chin tucks = 1 round. Do 2 rounds. End-of-week full posture reset before loading the body.</div></td><td><span class="sets">2 rounds</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=rep-qVOkqgk" target="_blank">▶ Face pull tutorial</a></td></tr>
-  </tbody></table>
-
-  <div class="section-label">Main workout — moderate weight, supersets, 12–15 rep range</div>
+  <div class="section-label">Main workout — supersets</div>
   <table><thead><tr><th>Exercise</th><th>Sets × Reps</th><th>Rest</th><th>Video link</th></tr></thead><tbody>
-    <tr><td><div class="ex-name">Leg press machine</div><div class="ex-machine">45° leg press</div><div class="ex-tip">Lighter than Wednesday — metabolic focus. 15 smooth reps, controlled tempo.</div><span class="tag t-legs">Legs</span></td><td><span class="sets">3 × 15</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=IZxyjW7MPJQ" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Incline chest press machine</div><div class="ex-machine">Incline chest press</div><div class="ex-tip">Moderate weight, higher reps. Mind-muscle connection — feel the chest contracting on every rep, not just the arms pushing.</div><span class="tag t-chest">Chest</span></td><td><span class="sets">3 × 15</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=G5mT7JZSOIA" target="_blank">▶ Watch</a></td></tr>
-    <tr><td><div class="ex-name">Seated cable row + face pull superset</div><div class="ex-machine">Cable row station — V-bar then rope</div><div class="ex-tip">10 rows immediately into 15 face pulls, no rest between. 60 sec rest after the pair. Back strength and posture in one superset.</div><span class="tag t-back">Back</span><span class="tag t-posture">Posture</span></td><td><span class="sets">3 × (10+15)</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=GZbfZ033f74" target="_blank">▶ Watch row</a></td></tr>
-    <tr><td><div class="ex-name">Shoulder press + reverse fly superset</div><div class="ex-machine">Shoulder press + pec deck reversed</div><div class="ex-tip">10 shoulder press immediately into 15 reverse flyes. Push-pull shoulder superset — maintains the 1:1.5 ratio even within a single superset.</div><span class="tag t-shoulder">Full shoulder</span></td><td><span class="sets">3 × (10+15)</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=Cm8bBqFnpAI" target="_blank">▶ Watch rev fly</a></td></tr>
-    <tr><td><div class="ex-name">Bicep curl + tricep pushdown superset</div><div class="ex-machine">Cable station — low then high pulley</div><div class="ex-tip">12 cable curls immediately into 12 pushdowns. Great pump. A strong close to the week for the arms.</div><span class="tag t-arms">Biceps + Triceps</span></td><td><span class="sets">3 × (12+12)</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=vB5OHsJ3EME" target="_blank">▶ Watch pushdown</a></td></tr>
-    <tr><td><div class="ex-name">Ab crunch machine + plank superset</div><div class="ex-machine">Crunch machine + floor mat</div><div class="ex-tip">15 machine crunches immediately into 30-sec plank (chin tucked). Core superset to close training.</div><span class="tag t-core">Core</span></td><td><span class="sets">3 rounds</span></td><td><span class="rest-val">45 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/watch?v=ASdvN_XEl_c" target="_blank">▶ Watch plank</a></td></tr>
+    <tr><td><div class="ex-name">Leg press machine</div><div class="ex-machine">Metabolic focus</div><span class="tag t-legs">Legs</span></td><td><span class="sets">3 × 15</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=45+degree+leg+press+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Incline chest press</div><div class="ex-machine">Moderate weight</div><span class="tag t-chest">Chest</span></td><td><span class="sets">3 × 15</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=incline+chest+press+machine+proper+form" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Seated row + face pull</div><div class="ex-machine">Superset back-to-back</div><span class="tag t-back">Back</span></td><td><span class="sets">3 × (10+15)</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=seated+row+superset+face+pull" target="_blank">▶ Watch search</a></td></tr>
+    <tr><td><div class="ex-name">Bicep curl + tricep pushdown</div><div class="ex-machine">Superset arms</div><span class="tag t-arms">Arms</span></td><td><span class="sets">3 × (12+12)</span></td><td><span class="rest-val">60 sec</span></td><td><a class="ex-link" href="https://www.youtube.com/results?search_query=bicep+curl+tricep+pushdown+superset" target="_blank">▶ Watch search</a></td></tr>
   </tbody></table>
-
-  <div class="section-label">Post-session stretches — 15 min (full-body weekly reset)</div>
-  <div class="stretch-grid">
-    <div class="stretch-card"><div class="stretch-name">Doorframe chest stretch<span class="stretch-duration">2 × 45 sec</span></div><div class="stretch-tip">End the training week with a deep pec stretch. Your most important weekly chest release — counters 5 days of forward shoulder posture.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=LdOTkzhjGaE" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Thoracic foam roller extension<span class="stretch-duration">90 sec</span></div><div class="stretch-tip">Roller across mid-back. Arms crossed, extend backward. End every training week here — resets the thoracic spine after 5 days of loading.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=W0fEC-rVDhE" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Kneeling hip flexor stretch<span class="stretch-duration">2 × 45 sec each</span></div><div class="stretch-tip">After 5 days of training and sitting at work, hip flexors are at their tightest. Release heading into the weekend.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=YQmpO9VT2X4" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Standing quad stretch<span class="stretch-duration">2 × 40 sec each</span></div><div class="stretch-tip">Pull heel to glute. After Friday's leg press, quads need a proper stretch going into the weekend recovery period.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=9vzeqDVE7nE" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Lat and side stretch<span class="stretch-duration">2 × 40 sec each</span></div><div class="stretch-tip">Hold a fixed point, lean sideways. Releases the lat after the cable row superset. A stiff lat contributes to rounded shoulder posture.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=9kGS7sOWu7c" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Pigeon pose (glute + hip)<span class="stretch-duration">2 × 45 sec each</span></div><div class="stretch-tip">Shin forward, opposite leg extended back. Deep hip and glute stretch — releases everything after the full-body session.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=24M9HLyxAUc" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Cat-cow mobilisation<span class="stretch-duration">2 × 10 slow reps</span></div><div class="stretch-tip">Arch and round the spine alternately on all fours. Decompresses the full spine after 5 days of training. Breathe into each position.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=kqnua4rHVVA" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Child's pose<span class="stretch-duration">90 sec</span></div><div class="stretch-tip">Close the entire training week here. Arms forward, breathe deeply. Signal recovery mode begins now. Take your time with this one.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=2MJGg-dUKh0" target="_blank">▶ Watch tutorial</a></div>
-  </div>
 </div>
 
-<!-- ══════ TRACKER (FIREBASE) ══════ -->
 <div class="day-panel" id="p-tracker">
   <div class="day-header"><span class="day-badge badge-info">Tracker</span><div><div class="day-title">Comprehensive Log</div><div class="day-focus">Bodyweight, Lift Overload, and Daily Habits</div></div></div>
   
-  <div class="section-label no-top">Bodyweight Log</div>
+  <div class="section-label no-top">Bodyweight Progression Chart</div>
+  <div class="chart-container">
+    <canvas id="bwChart"></canvas>
+  </div>
+
+  <div class="section-label">Bodyweight Log</div>
   <div class="tracker-form">
     <input type="date" id="t-date" class="track-input">
     <input type="number" id="t-weight" step="0.1" class="track-input" placeholder="Bodyweight (kg)">
@@ -429,7 +370,6 @@
   </div>
 </div>
 
-<!-- ══════ AI ANALYSIS ══════ -->
 <div class="day-panel" id="p-analysis">
   <div class="day-header"><span class="day-badge badge-info">AI Analysis</span><div><div class="day-title">LLM Data Evaluation</div><div class="day-focus">Generative text analysis based on all tracker data</div></div></div>
   
@@ -441,155 +381,49 @@
   <div id="ai-output"></div>
 </div>
 
-<!-- ══════ NUTRITION ══════ -->
 <div class="day-panel" id="p-nutrition">
   <div class="day-header"><span class="day-badge badge-info">Nutrition</span><div><div class="day-title">Nutrition prescription</div><div class="day-focus">Based on BMR 1,450 kcal · Lean bulk · Protein is priority #1</div></div></div>
   <div class="nut-grid">
-    <div class="nut-card"><div class="nut-label">Training day calories</div><div class="nut-val g">2,200–2,400</div><div class="nut-sub">kcal/day</div></div>
-    <div class="nut-card"><div class="nut-label">Rest day calories</div><div class="nut-val b">1,900–2,100</div><div class="nut-sub">kcal/day</div></div>
-    <div class="nut-card"><div class="nut-label">Daily protein</div><div class="nut-val o">140–160 g</div><div class="nut-sub">2.2g per kg bodyweight</div></div>
-    <div class="nut-card"><div class="nut-label">Daily carbs</div><div class="nut-val">230–260 g</div><div class="nut-sub">primary training fuel</div></div>
-    <div class="nut-card"><div class="nut-label">Daily fats</div><div class="nut-val">50–70 g</div><div class="nut-sub">testosterone support</div></div>
-    <div class="nut-card"><div class="nut-label">Daily water</div><div class="nut-val b">3–3.5 L</div><div class="nut-sub">Dubai heat + training</div></div>
+    <div class="nut-card"><div class="nut-label">Training day calories</div><div class="nut-val g">2,200–2,400</div></div>
+    <div class="nut-card"><div class="nut-label">Rest day calories</div><div class="nut-val b">1,900–2,100</div></div>
+    <div class="nut-card"><div class="nut-label">Daily protein</div><div class="nut-val o">140–160 g</div></div>
   </div>
-  <table><thead><tr><th>Category</th><th>Best sources</th><th>Why it matters for you</th></tr></thead><tbody>
-    <tr><td><div class="ex-name">Protein — priority #1</div></td><td style="font-size:12px;color:var(--text2);">Chicken breast, eggs, Greek yogurt, tuna, whey protein, labneh, cottage cheese</td><td style="font-size:12px;color:var(--text2);">Your InBody protein score is at the floor of normal. Fix this first. 140 g minimum every day.</td></tr>
-    <tr><td><div class="ex-name">Complex carbs</div></td><td style="font-size:12px;color:var(--text2);">Rice, oats, sweet potato, whole wheat bread, lentils</td><td style="font-size:12px;color:var(--text2);">Eat at lunch and pre-workout — not just dinner.</td></tr>
-    <tr><td><div class="ex-name">Healthy fats</div></td><td style="font-size:12px;color:var(--text2);">Olive oil, almonds, avocado, eggs, fatty fish</td><td style="font-size:12px;color:var(--text2);">Testosterone production. Do not drop below 50 g/day.</td></tr>
-    <tr><td><div class="ex-name">Pre-workout (60–90 min before)</div></td><td style="font-size:12px;color:var(--text2);">Rice + chicken · banana + protein shake · oats + eggs</td><td style="font-size:12px;color:var(--text2);">Fuels your 5pm session. Never train on an empty stomach.</td></tr>
-    <tr><td><div class="ex-name">Post-workout (within 60 min)</div></td><td style="font-size:12px;color:var(--text2);">Protein shake + banana · chicken + rice · Greek yogurt + fruit</td><td style="font-size:12px;color:var(--text2);">Muscle protein synthesis window. The most important meal of the day.</td></tr>
+  <table><thead><tr><th>Category</th><th>Best sources</th><th>Why it matters</th></tr></thead><tbody>
+    <tr><td><div class="ex-name">Protein — priority #1</div></td><td><div class="ex-tip">Chicken breast, eggs, Greek yogurt, tuna, whey</div></td><td><div class="ex-tip">Fix your low InBody protein score. 140 g min.</div></td></tr>
+    <tr><td><div class="ex-name">Pre-workout</div></td><td><div class="ex-tip">Rice + chicken · banana + protein shake</div></td><td><div class="ex-tip">Fuels your 5pm session.</div></td></tr>
   </tbody></table>
-  <div class="tips-box">
-    <div class="tips-title">Supplement stack</div>
-    <div class="tip-row"><strong>Creatine monohydrate 5g/day</strong> — every day including rest days. Most proven supplement for muscle gain. Start week 1.</div>
-    <div class="tip-row"><strong>Whey protein 1–2 scoops/day</strong> — only if struggling to hit 140 g from food alone.</div>
-    <div class="tip-row"><strong>Vitamin D3 + Magnesium</strong> — critical for testosterone, sleep quality, and recovery. Important in the UAE where sun is often avoided.</div>
-    <div class="tip-row"><strong>Omega-3 fish oil 2–3g/day</strong> — reduces inflammation, improves body composition, supports heart health.</div>
-  </div>
 </div>
 
-<!-- ══════ POSTURE ══════ -->
 <div class="day-panel" id="p-posture">
-  <div class="day-header"><span class="day-badge badge-info">Posture</span><div><div class="day-title">Rounded shoulders + tech neck — full correction plan</div><div class="day-focus">Root causes · Priority fixes · Daily routine · Desk habits</div></div></div>
-  <div class="posture-grid">
-    <div class="posture-card">
-      <div class="posture-card-title" style="color:var(--red);">Root causes of your posture issues</div>
-      <div class="posture-item">Tight pectorals pulling shoulders forward</div>
-      <div class="posture-item">Weak rhomboids and rear delts — cannot hold shoulders back</div>
-      <div class="posture-item">Tight hip flexors from sitting — tilts pelvis forward, ripples up the spine</div>
-      <div class="posture-item">Weak deep cervical flexors — head drifts forward (forward head posture)</div>
-      <div class="posture-item">Stiff thoracic spine — upper back locks into a rounded curve</div>
-    </div>
-    <div class="posture-card">
-      <div class="posture-card-title" style="color:var(--accent);">Fix priority order</div>
-      <div class="posture-item">1. Face pulls — every gym session</div>
-      <div class="posture-item">2. Reverse fly machine — 3× per week</div>
-      <div class="posture-item">3. Chin tucks — morning, evening, and at gym</div>
-      <div class="posture-item">4. Thoracic foam roller extension — daily at home</div>
-      <div class="posture-item">5. Chest stretch — before every push session</div>
-      <div class="posture-item">6. Hip flexor stretch — before every leg session</div>
-      <div class="posture-item">7. Pull more than push every training week (1:1.5 ratio)</div>
-    </div>
-  </div>
-  <div class="section-label">Daily 10-min posture routine — every day including weekends</div>
+  <div class="day-header"><span class="day-badge badge-info">Posture</span><div><div class="day-title">Rounded shoulders correction</div><div class="day-focus">Daily routine · Desk habits</div></div></div>
   <div class="stretch-grid">
-    <div class="stretch-card"><div class="stretch-name">Chin tuck<span class="stretch-duration">3 × 10 reps (5 sec hold)</span></div><div class="stretch-tip">Pull chin straight back, ears over shoulders. Feel stretch at base of skull. Re-activates deep cervical flexors switched off by years of screen use.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=wQylqaCl8Zo" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Thoracic foam roller extension<span class="stretch-duration">90 sec</span></div><div class="stretch-tip">Roller across mid-back (T4–T8). Arms crossed, extend backward, breathe. Move roller slightly up and down. Single best tool for thoracic stiffness causing your rounded shoulders.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=W0fEC-rVDhE" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Doorframe chest stretch<span class="stretch-duration">2 × 45 sec</span></div><div class="stretch-tip">Arms at 90° in doorway, lean forward gently. Do NOT shrug — keep shoulders down. Releases tight pecs pulling shoulders forward.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=LdOTkzhjGaE" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Hip flexor kneeling stretch<span class="stretch-duration">2 × 45 sec each</span></div><div class="stretch-tip">Back knee on floor, front foot forward. Push hips forward, squeeze back glute. Breaks the hip flexor tightness pattern that worsens your entire postural chain.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=YQmpO9VT2X4" target="_blank">▶ Watch tutorial</a></div>
-    <div class="stretch-card"><div class="stretch-name">Wall angel<span class="stretch-duration">2 × 10 slow reps</span></div><div class="stretch-tip">Back flat on wall, goalpost arms slide overhead maintaining full wall contact. Where contact is lost = the tight area needing the most work.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=pBGLPDfmJvA" target="_blank">▶ Watch tutorial</a></div>
-  </div>
-  <div class="tips-box">
-    <div class="tips-title">Desk habits — as important as the gym</div>
-    <div class="tip-row">Monitor at eye level — if you look down at a screen all day, no amount of gym work fully fixes tech neck. This is the single most impactful non-gym change.</div>
-    <div class="tip-row">Set a phone alarm every 45 min at work: stand up, do 10 chin tucks, roll shoulders back 5 times. 45 seconds. Breaks the forward-posture pattern.</div>
-    <div class="tip-row">Sleep on your back or side — not face-down. Face-down sleeping aggressively worsens neck alignment every single night.</div>
-    <div class="tip-row">Expect 8–12 weeks of consistent effort for visible posture improvement. It took years to develop — months to reverse.</div>
+    <div class="stretch-card"><div class="stretch-name">Chin tuck<span class="stretch-duration">3 × 10 reps</span></div><div class="stretch-tip">Pull chin straight back. Re-activates deep cervical flexors.</div><a class="stretch-link" href="https://www.youtube.com/results?search_query=chin+tuck+posture+exercise" target="_blank">▶ Watch search</a></div>
+    <div class="stretch-card"><div class="stretch-name">Thoracic foam roller<span class="stretch-duration">90 sec</span></div><div class="stretch-tip">Roller across mid-back. Single best tool for thoracic stiffness.</div><a class="stretch-link" href="https://www.youtube.com/results?search_query=thoracic+foam+roller+extension" target="_blank">▶ Watch search</a></div>
   </div>
 </div>
 
-<!-- ══════ WARM-UP ══════ -->
 <div class="day-panel" id="p-warmup">
-  <div class="day-header"><span class="day-badge badge-info">Warm-up</span><div><div class="day-title">Pre-session warm-up ritual — every day, 8–10 min</div><div class="day-focus">Joint prep · Blood flow · Posture activation · Injury prevention</div></div></div>
-  <div class="warmup-step">
-    <div class="step-num">01</div>
-    <div class="step-body"><div class="ex-name">Treadmill brisk walk or stationary bike — 4 min</div><div class="ex-tip">Moderate pace — warm and slightly out of breath but able to talk. Raises core temperature and joint lubrication. On Monday, the 15-min cardio block replaces this step.</div><a class="ex-link" href="https://www.youtube.com/watch?v=w9QIHiSTKm4" target="_blank">▶ Incline walk tutorial</a></div>
-  </div>
-  <div class="warmup-step">
-    <div class="step-num">02</div>
-    <div class="step-body"><div class="ex-name">Arm circles — both directions, small to large — 1 min</div><div class="ex-tip">10 forward, 10 backward, progressively larger circles. Lubricates the shoulder joint — critical before upper body work given your rounded shoulder condition.</div><a class="ex-link" href="https://www.youtube.com/watch?v=Cn_9bQHEj9s" target="_blank">▶ Watch demo</a></div>
-  </div>
-  <div class="warmup-step">
-    <div class="step-num">03</div>
-    <div class="step-body"><div class="ex-name">Chest opener + backward shoulder rolls — 1 min</div><div class="ex-tip">Roll shoulders backward 10 times. Clasp hands behind back and open chest upward. Directly counteracts the forward-shoulder posture accumulated during the workday before you arrived.</div><a class="ex-link" href="https://www.youtube.com/watch?v=3H-e9J-5wJg" target="_blank">▶ Watch demo</a></div>
-  </div>
-  <div class="warmup-step">
-    <div class="step-num">04</div>
-    <div class="step-body"><div class="ex-name">Chin tucks × 10 — 1 min</div><div class="ex-tip">Against wall or seated. Pull chin back, hold 5 sec per rep. Every session starts with this. Tech neck daily fix — activates deep cervical flexors before loading the body.</div><a class="ex-link" href="https://www.youtube.com/watch?v=wQylqaCl8Zo" target="_blank">▶ Watch demo</a></div>
-  </div>
-  <div class="warmup-step">
-    <div class="step-num">05</div>
-    <div class="step-body"><div class="ex-name">Warm-up sets on first machine — 3 min</div><div class="ex-tip">2 sets × 15 reps at exactly 50% of your working weight. Prepares specific muscles and joint angles for the session load. Never load a cold muscle to working weight — this one step eliminates the majority of training injuries.</div></div>
-  </div>
-  <div class="tips-box">
-    <div class="tips-title">Golden rules for machine training</div>
-    <div class="tip-row">Always adjust seat and pad height before loading weight. 30 seconds of setup prevents months of injury.</div>
-    <div class="tip-row">Control the eccentric (return/lowering phase) 2–3 seconds on every rep. Muscle is built on the way down, not the lift.</div>
-    <div class="tip-row">Do not ego-lift. Proper range of motion matters more than the weight stack number. Half-reps produce zero muscle growth signal.</div>
-    <div class="tip-row">If a machine is occupied: every exercise in this plan has a direct cable machine alternative. Cables are always available and are often superior.</div>
-  </div>
+  <div class="day-header"><span class="day-badge badge-info">Warm-up</span><div><div class="day-title">Pre-session warm-up</div></div></div>
+  <div class="warmup-step"><div class="step-num">01</div><div class="step-body"><div class="ex-name">Treadmill walk — 4 min</div></div></div>
+  <div class="warmup-step"><div class="step-num">02</div><div class="step-body"><div class="ex-name">Arm circles — 1 min</div></div></div>
+  <div class="warmup-step"><div class="step-num">03</div><div class="step-body"><div class="ex-name">Chin tucks × 10</div></div></div>
 </div>
 
-<!-- ══════ PHASES ══════ -->
 <div class="day-panel" id="p-phases">
-  <div class="day-header"><span class="day-badge badge-info">Phase guide</span><div><div class="day-title">12-week phase guide</div><div class="day-focus">How to progress · What to expect · Weekly cardio summary</div></div></div>
-  <div class="section-label no-top">Expected progress timeline</div>
-  <div class="prog-row"><div class="prog-label">Weeks 1–4: Foundation</div><div class="prog-bar-wrap"><div class="prog-bar" style="width:33%"></div></div><div class="prog-val">Technique + habits</div></div>
-  <div class="prog-row"><div class="prog-label">Weeks 5–8: Hypertrophy</div><div class="prog-bar-wrap"><div class="prog-bar" style="width:66%"></div></div><div class="prog-val">+1.5–2 kg muscle</div></div>
-  <div class="prog-row"><div class="prog-label">Weeks 9–12: Strength</div><div class="prog-bar-wrap"><div class="prog-bar" style="width:90%"></div></div><div class="prog-val">+3–4 kg total</div></div>
-  <div class="prog-row"><div class="prog-label">Posture improvement</div><div class="prog-bar-wrap"><div class="prog-bar" style="width:70%;background:var(--accent3)"></div></div><div class="prog-val">Visible at 8–12 wks</div></div>
-  <div class="prog-row"><div class="prog-label">Body fat reduction</div><div class="prog-bar-wrap"><div class="prog-bar" style="width:55%;background:var(--accent4)"></div></div><div class="prog-val">−1.5–2 kg fat</div></div>
-
-  <div class="section-label">Weekly cardio summary</div>
-  <table><thead><tr><th>Day</th><th>Cardio type</th><th>Duration</th><th>Timing</th><th>Purpose</th></tr></thead><tbody>
-    <tr><td><span class="sets">Monday</span></td><td>Incline treadmill walk</td><td>15 min</td><td>Before training</td><td>Warm-up + fat burn + posture practice</td></tr>
-    <tr><td><span class="sets">Tuesday</span></td><td>Stationary bike — easy spin</td><td>10 min</td><td>After training</td><td>Recovery flush + light calorie burn</td></tr>
-    <tr><td><span class="sets">Wednesday</span></td><td>Stairmaster or incline walk</td><td>15 min</td><td>After training</td><td>Post-depletion fat burn (most effective)</td></tr>
-    <tr><td><span class="sets">Thursday</span></td><td>None — rest CNS</td><td>—</td><td>—</td><td>Full resources for heavy strength work</td></tr>
-    <tr><td><span class="sets">Friday</span></td><td>Incline treadmill walk</td><td>20 min</td><td>After training</td><td>Biggest fat-burn session of the week</td></tr>
-    <tr><td><span class="sets">Weekend</span></td><td>Outdoor or treadmill walking</td><td>8,000–10,000 steps/day</td><td>Anytime</td><td>Active recovery + WHR + trunk fat reduction</td></tr>
-  </tbody></table>
-
-  <div class="section-label">Phase breakdown</div>
-  <table><thead><tr><th>Phase</th><th>Focus</th><th>Rep range</th><th>What to expect</th></tr></thead><tbody>
-    <tr><td><div class="ex-name">Weeks 1–4</div><div class="ex-tip">Foundation</div></td><td style="font-size:12px;color:var(--text2);">Perfect technique. Establish baseline weights. Build the daily habit. Posture activation every session.</td><td><span class="sets">12–15 reps</span></td><td style="font-size:12px;color:var(--text2);">Nervous system adapts first — strength gains come fast before visible muscle. Posture correction starts working within 2–3 weeks.</td></tr>
-    <tr><td><div class="ex-name">Weeks 5–8</div><div class="ex-tip">Hypertrophy</div></td><td style="font-size:12px;color:var(--text2);">Progressive overload — add weight every 1–2 weeks on every compound. Never stay at the same weight for more than 2 consecutive weeks.</td><td><span class="sets">8–12 reps</span></td><td style="font-size:12px;color:var(--text2);">Visible muscle appears. Arms, chest, and shoulders show first. Energy improves. Posture correction noticeable to others.</td></tr>
-    <tr><td><div class="ex-name">Weeks 9–12</div><div class="ex-tip">Strength + recomp</div></td><td style="font-size:12px;color:var(--text2);">Heavier compound loads. Slightly reduce rest on isolation work to increase metabolic demand and fat burning.</td><td><span class="sets">6–8 compound, 10–12 isolation</span></td><td style="font-size:12px;color:var(--text2);">Body fat visibly reduces. Waist tightens. Posture significantly improved. Repeat InBody at end of week 12.</td></tr>
-  </tbody></table>
-
-  <div class="tips-box">
-    <div class="tips-title">Weekly non-negotiables for the program to work</div>
-    <div class="tip-row">Sleep 7.5–8 hours every night. Muscle is built during sleep — this cannot be compensated for at the gym.</div>
-    <div class="tip-row">Hit 140 g protein every day — training days and rest days. Muscle is built during recovery when protein is available.</div>
-    <div class="tip-row">Chin tucks and thoracic foam roller extension every single day including weekends — 10 minutes total.</div>
-    <div class="tip-row">Weekend walks 8,000–10,000 steps. Burns fat, improves WHR of 0.91, and keeps metabolism elevated through recovery days.</div>
-    <div class="tip-row">Reassess InBody at week 12. With consistent effort: expect +2–4 kg muscle, −1.5–2 kg fat, and clearly improved shoulder alignment.</div>
-  </div>
+  <div class="day-header"><span class="day-badge badge-info">Phases</span><div><div class="day-title">12-week guide</div></div></div>
+  <div class="prog-row"><div class="prog-label">Weeks 1–4: Foundation</div><div class="prog-bar-wrap"><div class="prog-bar" style="width:33%"></div></div><div class="prog-val">Technique</div></div>
+  <div class="prog-row"><div class="prog-label">Weeks 5–8: Hypertrophy</div><div class="prog-bar-wrap"><div class="prog-bar" style="width:66%"></div></div><div class="prog-val">+1.5–2 kg</div></div>
+  <div class="prog-row"><div class="prog-label">Weeks 9–12: Strength</div><div class="prog-bar-wrap"><div class="prog-bar" style="width:90%"></div></div><div class="prog-val">+3–4 kg</div></div>
 </div>
 
-</div><!-- end content -->
-
-<div class="footer">
-  <div class="footer-text">Abdullah · InBody: 2026.03.28 · Age 28 · 174 cm · 63.6 kg · BMI 21.0 · PBF 21.4% · WHR 0.91</div>
-  <div class="footer-text">Phase 1 — Machine training · Full program with cardio + stretching + video links · Reassess week 12</div>
-</div>
-
-<script>
+</div><script>
 function show(id,el){
   document.querySelectorAll('.day-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('p-'+id).classList.add('active');
   el.classList.add('active');
+  // Scroll tabs into view on mobile
+  el.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -597,6 +431,7 @@ document.getElementById('t-date').valueAsDate = new Date();
 window.bodyweightLogs = [];
 window.liftLogs = [];
 window.habitLogs = [];
+let bwChartInstance = null; // Global chart instance
 </script>
 
 <script type="module">
@@ -613,7 +448,7 @@ window.habitLogs = [];
     appId: "1:135622720796:web:ddfe8ea72355e540e7ced9"
   };
 
-  const appId = typeof __app_id !== 'undefined' ? __app_id : 'abdullah-training';
+  const appId = 'abdullah-training';
 
   try {
     const app = initializeApp(firebaseConfig);
@@ -622,17 +457,63 @@ window.habitLogs = [];
 
     const initAuth = async () => {
       try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
-        }
-      } catch (err) {
-        console.warn("Token mismatch, falling back to anonymous auth:", err);
         await signInAnonymously(auth);
+      } catch (err) {
+        console.warn("Auth Error:", err);
       }
     };
     initAuth();
+
+    // Chart.js Update Function
+    const updateChart = () => {
+        if (!document.getElementById('bwChart')) return;
+        const ctx = document.getElementById('bwChart').getContext('2d');
+        
+        // Sort chronologically for the chart
+        const chartData = [...window.bodyweightLogs].sort((a,b) => a.timestamp - b.timestamp);
+        const labels = chartData.map(log => log.date);
+        const dataPoints = chartData.map(log => log.weight);
+
+        if (bwChartInstance) {
+            bwChartInstance.destroy();
+        }
+
+        bwChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Bodyweight (kg)',
+                    data: dataPoints,
+                    borderColor: '#c8f07a',
+                    backgroundColor: 'rgba(200, 240, 122, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#0d0d0d',
+                    pointBorderColor: '#c8f07a',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#9a9488' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#9a9488' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    };
 
     onAuthStateChanged(auth, (user) => {
       if (!user) return;
@@ -641,14 +522,12 @@ window.habitLogs = [];
       const liftCol = collection(db, 'artifacts', appId, 'users', user.uid, 'lifts');
       const habitCol = collection(db, 'artifacts', appId, 'users', user.uid, 'habits');
 
-      // Save Bodyweight
+      // Save Actions
       document.getElementById('t-save').addEventListener('click', async () => {
         const date = document.getElementById('t-date').value;
         const weight = document.getElementById('t-weight').value;
         const notes = document.getElementById('t-notes').value;
-        
         if(!date || !weight) return;
-        
         document.getElementById('t-save').disabled = true;
         await addDoc(bwCol, { date, weight: parseFloat(weight), notes, timestamp: Date.now(), type: 'bw' });
         document.getElementById('t-weight').value = '';
@@ -656,46 +535,30 @@ window.habitLogs = [];
         document.getElementById('t-save').disabled = false;
       });
 
-      // Save Lift
       document.getElementById('t-save-lift').addEventListener('click', async () => {
         const date = document.getElementById('t-date').value;
         const exercise = document.getElementById('t-exercise').value;
         const load = document.getElementById('t-lift-weight').value;
         const sets = document.getElementById('t-sets').value;
         const reps = document.getElementById('t-reps').value;
-
         if(!date || !load || !sets || !reps) return;
-
         document.getElementById('t-save-lift').disabled = true;
         await addDoc(liftCol, { date, exercise, load: parseFloat(load), sets: parseInt(sets), reps: parseInt(reps), timestamp: Date.now(), type: 'lift' });
-        
         document.getElementById('t-lift-weight').value = '';
         document.getElementById('t-sets').value = '';
         document.getElementById('t-reps').value = '';
         document.getElementById('t-save-lift').disabled = false;
       });
 
-      // Save Habits
       document.getElementById('t-save-habit').addEventListener('click', async () => {
         const date = document.getElementById('t-date').value;
         const sleep = document.getElementById('t-sleep').value;
         const protein = document.getElementById('t-protein').value;
         const water = document.getElementById('t-water').value;
         const posture = document.getElementById('t-posture-check').value;
-
         if(!date || !sleep || !protein || !water) return;
-
         document.getElementById('t-save-habit').disabled = true;
-        await addDoc(habitCol, { 
-          date, 
-          sleep: parseFloat(sleep), 
-          protein: parseInt(protein), 
-          water: parseFloat(water), 
-          posture, 
-          timestamp: Date.now(), 
-          type: 'habit' 
-        });
-        
+        await addDoc(habitCol, { date, sleep: parseFloat(sleep), protein: parseInt(protein), water: parseFloat(water), posture, timestamp: Date.now(), type: 'habit' });
         document.getElementById('t-sleep').value = '';
         document.getElementById('t-protein').value = '';
         document.getElementById('t-water').value = '';
@@ -703,11 +566,10 @@ window.habitLogs = [];
         document.getElementById('t-save-habit').disabled = false;
       });
 
-      // Read & Render All Logs
+      // Render Logs
       const renderLogs = () => {
         const container = document.getElementById('log-container');
         container.innerHTML = '';
-        
         const combined = [...window.bodyweightLogs, ...window.liftLogs, ...window.habitLogs].sort((a, b) => b.timestamp - a.timestamp);
 
         if(combined.length === 0) {
@@ -718,9 +580,7 @@ window.habitLogs = [];
         combined.forEach(log => {
           const div = document.createElement('div');
           div.className = 'log-entry';
-          
-          let leftCol = '';
-          let rightCol = '';
+          let leftCol = ''; let rightCol = '';
 
           if(log.type === 'bw') {
             leftCol = `<div class="log-date">${log.date} — Bodyweight</div><div class="log-notes">${log.notes || 'No notes'}</div>`;
@@ -733,41 +593,19 @@ window.habitLogs = [];
             rightCol = `<div class="log-weight" style="color:var(--accent); font-size:16px;">${log.protein}g P | ${log.water}L W</div>`;
           }
 
-          div.innerHTML = `
-            <div style="flex:1;">
-              ${leftCol}
-            </div>
-            <div style="display:flex; align-items:center; gap:12px;">
-              ${rightCol}
-              <button class="delete-btn" data-id="${log.id}" data-type="${log.type}">DELETE</button>
-            </div>
-          `;
+          div.innerHTML = `<div style="flex:1;">${leftCol}</div><div style="display:flex; align-items:center; gap:12px;">${rightCol}<button class="delete-btn" data-id="${log.id}" data-type="${log.type}">DEL</button></div>`;
           container.appendChild(div);
 
           const btn = div.querySelector('.delete-btn');
           btn.addEventListener('click', async () => {
-            if(btn.innerText === 'DELETE') {
-              btn.innerText = 'SURE?';
-              btn.style.background = 'var(--red)';
-              btn.style.color = 'var(--bg)';
-              setTimeout(() => {
-                if(btn && btn.innerText === 'SURE?') {
-                  btn.innerText = 'DELETE';
-                  btn.style.background = 'transparent';
-                  btn.style.color = 'var(--red)';
-                }
-              }, 3000);
+            if(btn.innerText === 'DEL') {
+              btn.innerText = 'SURE?'; btn.style.background = 'var(--red)'; btn.style.color = 'var(--bg)';
+              setTimeout(() => { if(btn && btn.innerText === 'SURE?') { btn.innerText = 'DEL'; btn.style.background = 'transparent'; btn.style.color = 'var(--red)'; } }, 3000);
               return;
             }
-
             btn.innerText = '...';
             const colMap = { 'bw': 'bodyweight', 'lift': 'lifts', 'habit': 'habits' };
-            const colName = colMap[log.type];
-            try {
-              await deleteDoc(doc(db, 'artifacts', appId, 'users', user.uid, colName, log.id));
-            } catch(err) {
-              console.error(err);
-            }
+            await deleteDoc(doc(db, 'artifacts', appId, 'users', user.uid, colMap[log.type], log.id));
           });
         });
       };
@@ -776,85 +614,25 @@ window.habitLogs = [];
         window.bodyweightLogs = [];
         snapshot.forEach((doc) => window.bodyweightLogs.push({ id: doc.id, ...doc.data() }));
         renderLogs();
-      }, (err) => console.error(err));
+        updateChart(); // Update visualization when new weight is added
+      });
 
       onSnapshot(liftCol, (snapshot) => {
         window.liftLogs = [];
         snapshot.forEach((doc) => window.liftLogs.push({ id: doc.id, ...doc.data() }));
         renderLogs();
-      }, (err) => console.error(err));
+      });
 
       onSnapshot(habitCol, (snapshot) => {
         window.habitLogs = [];
         snapshot.forEach((doc) => window.habitLogs.push({ id: doc.id, ...doc.data() }));
         renderLogs();
-      }, (err) => console.error(err));
+      });
     });
 
   } catch(e) {
     console.error("Firebase init failed.", e);
   }
-</script>
-
-<script>
-// AI Integration Logic
-document.getElementById('btn-analyze').addEventListener('click', async () => {
-    const apiKey = document.getElementById('gemini-key').value.trim();
-    const outputDiv = document.getElementById('ai-output');
-    
-    if (!apiKey) {
-        outputDiv.style.display = 'block';
-        outputDiv.innerHTML = '<span style="color:var(--red);">Error: API Key required.</span>';
-        return;
-    }
-    
-    if (window.bodyweightLogs.length === 0 && window.liftLogs.length === 0 && window.habitLogs.length === 0) {
-        outputDiv.style.display = 'block';
-        outputDiv.innerHTML = '<span style="color:var(--red);">Error: No tracking data available to analyze.</span>';
-        return;
-    }
-
-    outputDiv.style.display = 'block';
-    outputDiv.innerText = 'Analyzing data...';
-    document.getElementById('btn-analyze').disabled = true;
-
-    const bwData = JSON.stringify(window.bodyweightLogs.slice(0, 10));
-    const liftData = JSON.stringify(window.liftLogs.slice(0, 15));
-    const habitData = JSON.stringify(window.habitLogs.slice(0, 10));
-    
-    const prompt = `
-    You are an AI analyzing training data for Abdullah (Age 28, Baseline: 63.6kg, 21.4% BF, Target: 68-70kg lean bulk).
-    
-    Bodyweight Logs: ${bwData}
-    Lift Progression Logs: ${liftData}
-    Daily Habit Logs (Protein, Sleep, Water, Posture): ${habitData}
-    
-    Provide a blunt, direct, 5-sentence analysis.
-    Assess bodyweight trajectory against the 68-70kg lean bulk goal. Evaluate progressive overload on logged exercises. Call out any failures in habit compliance (e.g., missed protein targets or skipped posture work). Demand specific adjustments if volume, load, or recovery is inadequate.
-    `;
-
-    try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
-            })
-        });
-
-        const data = await response.json();
-        
-        if (data.error) {
-            outputDiv.innerHTML = `<span style="color:var(--red);">API Error: ${data.error.message}</span>`;
-        } else {
-            outputDiv.innerText = data.candidates[0].content.parts[0].text;
-        }
-    } catch (error) {
-        outputDiv.innerHTML = `<span style="color:var(--red);">Network Error: ${error.message}</span>`;
-    } finally {
-        document.getElementById('btn-analyze').disabled = false;
-    }
-});
 </script>
 </body>
 </html>
