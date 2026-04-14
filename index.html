@@ -100,6 +100,28 @@
   .step-num{font-family:var(--mono);font-size:18px;font-weight:500;color:var(--accent);min-width:28px;line-height:1;padding-top:2px;}
   .footer{padding:24px 40px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
   .footer-text{font-family:var(--mono);font-size:11px;color:var(--text3);}
+
+  /* Tracker & AI CSS */
+  .tracker-form, .ai-form{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;background:var(--bg3);padding:16px;border-radius:8px;border:1px solid var(--border);}
+  .lift-form{grid-template-columns:2fr 1fr 1fr 1fr 1.5fr;}
+  .habit-form{grid-template-columns:1fr 1fr 1fr 1.5fr 1fr;}
+  .ai-form{grid-template-columns:1fr;}
+  .track-input{background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:10px 12px;border-radius:6px;font-family:var(--font);font-size:14px;outline:none;width:100%;}
+  .track-input:focus{border-color:var(--accent);}
+  .track-btn{background:var(--accent);color:var(--bg);border:none;padding:10px 16px;border-radius:6px;font-weight:600;font-family:var(--font);cursor:pointer;font-size:14px;transition:0.2s;}
+  .track-btn:hover{background:var(--accent2);}
+  .track-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .log-entry{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:16px;}
+  .log-date{font-family:var(--mono);font-size:11px;color:var(--accent4);margin-bottom:4px;letter-spacing:0.05em;}
+  .log-weight{font-size:20px;font-weight:600;color:var(--text);}
+  .log-notes{font-size:13px;color:var(--text2);margin-top:4px;}
+  .delete-btn{background:transparent;border:1px solid var(--red);color:var(--red);padding:6px 12px;border-radius:4px;font-size:10px;font-family:var(--mono);cursor:pointer;text-transform:uppercase;transition:0.2s;}
+  .delete-btn:hover{background:rgba(240,122,122,0.1);}
+  #ai-output{background:rgba(200,240,122,0.05);border:1px solid rgba(200,240,122,0.2);padding:16px;border-radius:8px;color:var(--text);font-size:13px;line-height:1.6;margin-top:16px;white-space:pre-wrap;display:none;}
+  
+  @media(max-width:800px){
+    .tracker-form, .lift-form, .habit-form{grid-template-columns:1fr;}
+  }
   @media(max-width:640px){
     .header,.tabs-wrap,.content,.footer{padding-left:20px;padding-right:20px;}
     .alert{margin-left:20px;margin-right:20px;}
@@ -126,18 +148,20 @@
   </div>
 </div>
 
-<div class="alert"><strong>Complete program:</strong> Every session now includes tailored cardio (calibrated per day — heavier days = less cardio), a full post-session stretch sequence, and YouTube video links on every exercise. Push-to-pull ratio is 1:1.5. Face pulls, chin tucks, and thoracic work appear in every session.</div>
+<div class="alert"><strong>Complete program:</strong> Cloud tracking enabled for bodyweight, exercise lifts, and daily habits. Firebase configured for data continuity. Detailed descriptions restored across all informational tabs.</div>
 
 <div class="tabs-wrap">
-  <div class="tab active" onclick="show('mon',this)">Mon — Push</div>
-  <div class="tab" onclick="show('tue',this)">Tue — Pull</div>
-  <div class="tab" onclick="show('wed',this)">Wed — Legs</div>
-  <div class="tab" onclick="show('thu',this)">Thu — Upper</div>
-  <div class="tab" onclick="show('fri',this)">Fri — Full Body</div>
+  <div class="tab active" onclick="show('mon',this)">Mon</div>
+  <div class="tab" onclick="show('tue',this)">Tue</div>
+  <div class="tab" onclick="show('wed',this)">Wed</div>
+  <div class="tab" onclick="show('thu',this)">Thu</div>
+  <div class="tab" onclick="show('fri',this)">Fri</div>
+  <div class="tab" onclick="show('tracker',this)">Tracker</div>
+  <div class="tab" onclick="show('analysis',this)">AI Analysis</div>
   <div class="tab" onclick="show('nutrition',this)">Nutrition</div>
-  <div class="tab" onclick="show('posture',this)">Posture fix</div>
+  <div class="tab" onclick="show('posture',this)">Posture</div>
   <div class="tab" onclick="show('warmup',this)">Warm-up</div>
-  <div class="tab" onclick="show('phases',this)">Phase guide</div>
+  <div class="tab" onclick="show('phases',this)">Phases</div>
 </div>
 
 <div class="content">
@@ -184,13 +208,6 @@
     <div class="stretch-card"><div class="stretch-name">Chin tuck + neck side stretch<span class="stretch-duration">10 tucks + 30 sec each</span></div><div class="stretch-tip">10 chin tucks then tilt ear to shoulder. Releases tech neck tension accumulated during the session and the workday.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=wQylqaCl8Zo" target="_blank">▶ Watch tutorial</a></div>
     <div class="stretch-card"><div class="stretch-name">Child's pose<span class="stretch-duration">60 sec</span></div><div class="stretch-tip">Kneel, sit back on heels, arms extended forward. Decompresses the spine, relaxes the entire back after pressing. Breathe deeply.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=2MJGg-dUKh0" target="_blank">▶ Watch tutorial</a></div>
   </div>
-  <div class="tips-box">
-    <div class="tips-title">Monday total: ~75 min</div>
-    <div class="tip-row">15 min cardio + 8 min activation + ~40 min training + 10 min stretching</div>
-    <div class="tip-row">Set seat height on every machine before loading weight — this single habit prevents most gym injuries.</div>
-    <div class="tip-row">Control the return on every rep — 2–3 sec eccentric. Muscle is built on the way down, not the push.</div>
-    <div class="tip-row">If shoulder clicks or hurts on any pressing exercise — stop and replace with cable fly only for that muscle.</div>
-  </div>
 </div>
 
 <!-- ══════ TUESDAY ══════ -->
@@ -235,12 +252,6 @@
     <div class="stretch-card"><div class="stretch-name">Cat-cow spine mobilisation<span class="stretch-duration">2 × 10 slow reps</span></div><div class="stretch-tip">On all fours — arch and round the spine alternately. Decompresses every vertebra after a heavy pull session. Breathe into each position.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=kqnua4rHVVA" target="_blank">▶ Watch tutorial</a></div>
     <div class="stretch-card"><div class="stretch-name">Child's pose<span class="stretch-duration">60 sec</span></div><div class="stretch-tip">Kneel, sit back on heels, arms forward. Full spinal decompression. Perfect closing stretch for any heavy pull day.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=2MJGg-dUKh0" target="_blank">▶ Watch tutorial</a></div>
   </div>
-  <div class="tips-box">
-    <div class="tips-title">Tuesday total: ~75 min</div>
-    <div class="tip-row">10 min activation + ~45 min training + 10 min stretch + 10 min bike</div>
-    <div class="tip-row">This is your most important session for fixing rounded shoulders. Every back rep is simultaneously posture therapy.</div>
-    <div class="tip-row">Cue before every set: "chest up, shoulders down and back." Say it out loud if needed.</div>
-  </div>
 </div>
 
 <!-- ══════ WEDNESDAY ══════ -->
@@ -284,12 +295,6 @@
     <div class="stretch-card"><div class="stretch-name">Calf stretch on step or wall<span class="stretch-duration">2 × 40 sec each</span></div><div class="stretch-tip">Toes on a step, lower heel below. Full calf stretch after the high-volume calf work today. Hold the deep stretch point.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=W_3kuvw5gCQ" target="_blank">▶ Watch tutorial</a></div>
     <div class="stretch-card"><div class="stretch-name">Thoracic foam roller extension<span class="stretch-duration">90 sec</span></div><div class="stretch-tip">Roller across mid-back. Arms crossed, extend backward and breathe. Do this every day — even on leg days. It is your most important daily mobility tool.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=W0fEC-rVDhE" target="_blank">▶ Watch tutorial</a></div>
   </div>
-  <div class="tips-box">
-    <div class="tips-title">Wednesday total: ~80 min</div>
-    <div class="tip-row">8 min activation + ~45 min training + 12 min stretch + 15 min cardio</div>
-    <div class="tip-row">The leg session releases the most testosterone and growth hormone — it drives upper body gains even though no upper body is directly trained today.</div>
-    <div class="tip-row">If legs are too fatigued for the stairmaster, do a 15-min incline treadmill walk instead — equally effective for fat burning.</div>
-  </div>
 </div>
 
 <!-- ══════ THURSDAY ══════ -->
@@ -329,12 +334,6 @@
     <div class="stretch-card"><div class="stretch-name">Wall angel stretch<span class="stretch-duration">3 × 10 slow reps</span></div><div class="stretch-tip">Back flat on wall. Goalpost arms slide to overhead. Full wall contact throughout. After the heaviest session, this reset is most valuable.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=pBGLPDfmJvA" target="_blank">▶ Watch tutorial</a></div>
     <div class="stretch-card"><div class="stretch-name">Wrist and forearm stretch<span class="stretch-duration">2 × 30 sec each direction</span></div><div class="stretch-tip">Extend arm, pull fingers back (flexor stretch) then fingers down (extensor stretch). Relieves grip fatigue from heavy machine work.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=mSZWSQSSEjE" target="_blank">▶ Watch tutorial</a></div>
     <div class="stretch-card"><div class="stretch-name">Child's pose<span class="stretch-duration">60 sec</span></div><div class="stretch-tip">Arms forward, breathe into lower back. Signals the nervous system to shift into recovery mode after the heaviest session of the week.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=2MJGg-dUKh0" target="_blank">▶ Watch tutorial</a></div>
-  </div>
-  <div class="tips-box">
-    <div class="tips-title">Thursday total: ~67 min</div>
-    <div class="tip-row">10 min activation + ~45 min training + 12 min stretching</div>
-    <div class="tip-row">Track chest press and lat pulldown weights in your phone after every session. Numbers going up = the program is working.</div>
-    <div class="tip-row">If you feel flat or very fatigued, drop weight 20% and go higher reps — never ego-lift on accumulated fatigue.</div>
   </div>
 </div>
 
@@ -380,13 +379,66 @@
     <div class="stretch-card"><div class="stretch-name">Cat-cow mobilisation<span class="stretch-duration">2 × 10 slow reps</span></div><div class="stretch-tip">Arch and round the spine alternately on all fours. Decompresses the full spine after 5 days of training. Breathe into each position.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=kqnua4rHVVA" target="_blank">▶ Watch tutorial</a></div>
     <div class="stretch-card"><div class="stretch-name">Child's pose<span class="stretch-duration">90 sec</span></div><div class="stretch-tip">Close the entire training week here. Arms forward, breathe deeply. Signal recovery mode begins now. Take your time with this one.</div><a class="stretch-link" href="https://www.youtube.com/watch?v=2MJGg-dUKh0" target="_blank">▶ Watch tutorial</a></div>
   </div>
-  <div class="tips-box">
-    <div class="tips-title">Friday total: ~83 min</div>
-    <div class="tip-row">8 min activation + ~40 min training + 15 min stretching + 20 min cardio</div>
-    <div class="tip-row">Weekend: walk 8,000–10,000 steps both days. Active recovery burns fat without interfering with muscle recovery.</div>
-    <div class="tip-row">Chin tucks 3 × 10 morning and evening on Saturday and Sunday — 2 minutes, most direct tech neck fix available.</div>
-    <div class="tip-row">Thoracic foam roller at home on Saturday — 2 minutes. This one habit alone will visibly improve posture within 8 weeks.</div>
+</div>
+
+<!-- ══════ TRACKER (FIREBASE) ══════ -->
+<div class="day-panel" id="p-tracker">
+  <div class="day-header"><span class="day-badge badge-info">Tracker</span><div><div class="day-title">Comprehensive Log</div><div class="day-focus">Bodyweight, Lift Overload, and Daily Habits</div></div></div>
+  
+  <div class="section-label no-top">Bodyweight Log</div>
+  <div class="tracker-form">
+    <input type="date" id="t-date" class="track-input">
+    <input type="number" id="t-weight" step="0.1" class="track-input" placeholder="Bodyweight (kg)">
+    <input type="text" id="t-notes" class="track-input" placeholder="General notes">
+    <button id="t-save" class="track-btn">Save Bodyweight</button>
   </div>
+
+  <div class="section-label">Exercise Progression Log</div>
+  <div class="tracker-form lift-form">
+    <select id="t-exercise" class="track-input">
+      <option value="Incline Chest Press">Incline Chest Press</option>
+      <option value="Flat Chest Press">Flat Chest Press</option>
+      <option value="Machine Shoulder Press">Machine Shoulder Press</option>
+      <option value="Lat Pulldown">Lat Pulldown</option>
+      <option value="Seated Cable Row">Seated Cable Row</option>
+      <option value="Leg Press">Leg Press</option>
+      <option value="Leg Extension">Leg Extension</option>
+      <option value="Seated Leg Curl">Seated Leg Curl</option>
+    </select>
+    <input type="number" id="t-lift-weight" step="0.5" class="track-input" placeholder="Load (kg)">
+    <input type="number" id="t-sets" class="track-input" placeholder="Sets">
+    <input type="number" id="t-reps" class="track-input" placeholder="Reps">
+    <button id="t-save-lift" class="track-btn">Log Lift</button>
+  </div>
+
+  <div class="section-label">Daily Habits Log</div>
+  <div class="tracker-form habit-form">
+    <input type="number" id="t-sleep" step="0.5" class="track-input" placeholder="Sleep (hours)">
+    <input type="number" id="t-protein" class="track-input" placeholder="Protein (g)">
+    <input type="number" id="t-water" step="0.1" class="track-input" placeholder="Water (Liters)">
+    <select id="t-posture-check" class="track-input">
+      <option value="No">Posture Routine: Skipped</option>
+      <option value="Yes">Posture Routine: Completed</option>
+    </select>
+    <button id="t-save-habit" class="track-btn">Log Habits</button>
+  </div>
+
+  <div class="section-label">Log History</div>
+  <div id="log-container">
+    <div style="color:var(--text2);font-size:12px;">Loading records or database not configured...</div>
+  </div>
+</div>
+
+<!-- ══════ AI ANALYSIS ══════ -->
+<div class="day-panel" id="p-analysis">
+  <div class="day-header"><span class="day-badge badge-info">AI Analysis</span><div><div class="day-title">LLM Data Evaluation</div><div class="day-focus">Generative text analysis based on all tracker data</div></div></div>
+  
+  <div class="ai-form">
+    <input type="password" id="gemini-key" class="track-input" placeholder="Enter Google Gemini API Key">
+    <button id="btn-analyze" class="track-btn">Run Daily Analysis</button>
+  </div>
+  
+  <div id="ai-output"></div>
 </div>
 
 <!-- ══════ NUTRITION ══════ -->
@@ -540,6 +592,269 @@ function show(id,el){
   el.classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
+document.getElementById('t-date').valueAsDate = new Date();
+window.bodyweightLogs = [];
+window.liftLogs = [];
+window.habitLogs = [];
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDcsUBeh8eUArn1i9U5NZiWzIVWW6jhCWw",
+    authDomain: "app-ios-d60a2.firebaseapp.com",
+    projectId: "app-ios-d60a2",
+    storageBucket: "app-ios-d60a2.firebasestorage.app",
+    messagingSenderId: "135622720796",
+    appId: "1:135622720796:web:ddfe8ea72355e540e7ced9"
+  };
+
+  const appId = typeof __app_id !== 'undefined' ? __app_id : 'abdullah-training';
+
+  try {
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.warn("Token mismatch, falling back to anonymous auth:", err);
+        await signInAnonymously(auth);
+      }
+    };
+    initAuth();
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) return;
+
+      const bwCol = collection(db, 'artifacts', appId, 'users', user.uid, 'bodyweight');
+      const liftCol = collection(db, 'artifacts', appId, 'users', user.uid, 'lifts');
+      const habitCol = collection(db, 'artifacts', appId, 'users', user.uid, 'habits');
+
+      // Save Bodyweight
+      document.getElementById('t-save').addEventListener('click', async () => {
+        const date = document.getElementById('t-date').value;
+        const weight = document.getElementById('t-weight').value;
+        const notes = document.getElementById('t-notes').value;
+        
+        if(!date || !weight) return;
+        
+        document.getElementById('t-save').disabled = true;
+        await addDoc(bwCol, { date, weight: parseFloat(weight), notes, timestamp: Date.now(), type: 'bw' });
+        document.getElementById('t-weight').value = '';
+        document.getElementById('t-notes').value = '';
+        document.getElementById('t-save').disabled = false;
+      });
+
+      // Save Lift
+      document.getElementById('t-save-lift').addEventListener('click', async () => {
+        const date = document.getElementById('t-date').value;
+        const exercise = document.getElementById('t-exercise').value;
+        const load = document.getElementById('t-lift-weight').value;
+        const sets = document.getElementById('t-sets').value;
+        const reps = document.getElementById('t-reps').value;
+
+        if(!date || !load || !sets || !reps) return;
+
+        document.getElementById('t-save-lift').disabled = true;
+        await addDoc(liftCol, { date, exercise, load: parseFloat(load), sets: parseInt(sets), reps: parseInt(reps), timestamp: Date.now(), type: 'lift' });
+        
+        document.getElementById('t-lift-weight').value = '';
+        document.getElementById('t-sets').value = '';
+        document.getElementById('t-reps').value = '';
+        document.getElementById('t-save-lift').disabled = false;
+      });
+
+      // Save Habits
+      document.getElementById('t-save-habit').addEventListener('click', async () => {
+        const date = document.getElementById('t-date').value;
+        const sleep = document.getElementById('t-sleep').value;
+        const protein = document.getElementById('t-protein').value;
+        const water = document.getElementById('t-water').value;
+        const posture = document.getElementById('t-posture-check').value;
+
+        if(!date || !sleep || !protein || !water) return;
+
+        document.getElementById('t-save-habit').disabled = true;
+        await addDoc(habitCol, { 
+          date, 
+          sleep: parseFloat(sleep), 
+          protein: parseInt(protein), 
+          water: parseFloat(water), 
+          posture, 
+          timestamp: Date.now(), 
+          type: 'habit' 
+        });
+        
+        document.getElementById('t-sleep').value = '';
+        document.getElementById('t-protein').value = '';
+        document.getElementById('t-water').value = '';
+        document.getElementById('t-posture-check').value = 'No';
+        document.getElementById('t-save-habit').disabled = false;
+      });
+
+      // Read & Render All Logs
+      const renderLogs = () => {
+        const container = document.getElementById('log-container');
+        container.innerHTML = '';
+        
+        const combined = [...window.bodyweightLogs, ...window.liftLogs, ...window.habitLogs].sort((a, b) => b.timestamp - a.timestamp);
+
+        if(combined.length === 0) {
+          container.innerHTML = '<div style="color:var(--text2);font-size:12px;">No records found.</div>';
+          return;
+        }
+
+        combined.forEach(log => {
+          const div = document.createElement('div');
+          div.className = 'log-entry';
+          
+          let leftCol = '';
+          let rightCol = '';
+
+          if(log.type === 'bw') {
+            leftCol = `<div class="log-date">${log.date} — Bodyweight</div><div class="log-notes">${log.notes || 'No notes'}</div>`;
+            rightCol = `<div class="log-weight">${log.weight} kg</div>`;
+          } else if(log.type === 'lift') {
+            leftCol = `<div class="log-date">${log.date} — ${log.exercise}</div><div class="log-notes">${log.sets} sets × ${log.reps} reps</div>`;
+            rightCol = `<div class="log-weight" style="color:var(--accent4);">${log.load} kg</div>`;
+          } else if(log.type === 'habit') {
+            leftCol = `<div class="log-date">${log.date} — Daily Habits</div><div class="log-notes">Sleep: ${log.sleep}h | Posture: ${log.posture}</div>`;
+            rightCol = `<div class="log-weight" style="color:var(--accent); font-size:16px;">${log.protein}g P | ${log.water}L W</div>`;
+          }
+
+          div.innerHTML = `
+            <div style="flex:1;">
+              ${leftCol}
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              ${rightCol}
+              <button class="delete-btn" data-id="${log.id}" data-type="${log.type}">DELETE</button>
+            </div>
+          `;
+          container.appendChild(div);
+
+          const btn = div.querySelector('.delete-btn');
+          btn.addEventListener('click', async () => {
+            if(btn.innerText === 'DELETE') {
+              btn.innerText = 'SURE?';
+              btn.style.background = 'var(--red)';
+              btn.style.color = 'var(--bg)';
+              setTimeout(() => {
+                if(btn && btn.innerText === 'SURE?') {
+                  btn.innerText = 'DELETE';
+                  btn.style.background = 'transparent';
+                  btn.style.color = 'var(--red)';
+                }
+              }, 3000);
+              return;
+            }
+
+            btn.innerText = '...';
+            const colMap = { 'bw': 'bodyweight', 'lift': 'lifts', 'habit': 'habits' };
+            const colName = colMap[log.type];
+            try {
+              await deleteDoc(doc(db, 'artifacts', appId, 'users', user.uid, colName, log.id));
+            } catch(err) {
+              console.error(err);
+            }
+          });
+        });
+      };
+
+      onSnapshot(bwCol, (snapshot) => {
+        window.bodyweightLogs = [];
+        snapshot.forEach((doc) => window.bodyweightLogs.push({ id: doc.id, ...doc.data() }));
+        renderLogs();
+      }, (err) => console.error(err));
+
+      onSnapshot(liftCol, (snapshot) => {
+        window.liftLogs = [];
+        snapshot.forEach((doc) => window.liftLogs.push({ id: doc.id, ...doc.data() }));
+        renderLogs();
+      }, (err) => console.error(err));
+
+      onSnapshot(habitCol, (snapshot) => {
+        window.habitLogs = [];
+        snapshot.forEach((doc) => window.habitLogs.push({ id: doc.id, ...doc.data() }));
+        renderLogs();
+      }, (err) => console.error(err));
+    });
+
+  } catch(e) {
+    console.error("Firebase init failed.", e);
+  }
+</script>
+
+<script>
+// AI Integration Logic
+document.getElementById('btn-analyze').addEventListener('click', async () => {
+    const apiKey = document.getElementById('gemini-key').value.trim();
+    const outputDiv = document.getElementById('ai-output');
+    
+    if (!apiKey) {
+        outputDiv.style.display = 'block';
+        outputDiv.innerHTML = '<span style="color:var(--red);">Error: API Key required.</span>';
+        return;
+    }
+    
+    if (window.bodyweightLogs.length === 0 && window.liftLogs.length === 0 && window.habitLogs.length === 0) {
+        outputDiv.style.display = 'block';
+        outputDiv.innerHTML = '<span style="color:var(--red);">Error: No tracking data available to analyze.</span>';
+        return;
+    }
+
+    outputDiv.style.display = 'block';
+    outputDiv.innerText = 'Analyzing data...';
+    document.getElementById('btn-analyze').disabled = true;
+
+    const bwData = JSON.stringify(window.bodyweightLogs.slice(0, 10));
+    const liftData = JSON.stringify(window.liftLogs.slice(0, 15));
+    const habitData = JSON.stringify(window.habitLogs.slice(0, 10));
+    
+    const prompt = `
+    You are an AI analyzing training data for Abdullah (Age 28, Baseline: 63.6kg, 21.4% BF, Target: 68-70kg lean bulk).
+    
+    Bodyweight Logs: ${bwData}
+    Lift Progression Logs: ${liftData}
+    Daily Habit Logs (Protein, Sleep, Water, Posture): ${habitData}
+    
+    Provide a blunt, direct, 5-sentence analysis.
+    Assess bodyweight trajectory against the 68-70kg lean bulk goal. Evaluate progressive overload on logged exercises. Call out any failures in habit compliance (e.g., missed protein targets or skipped posture work). Demand specific adjustments if volume, load, or recovery is inadequate.
+    `;
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+            })
+        });
+
+        const data = await response.json();
+        
+        if (data.error) {
+            outputDiv.innerHTML = `<span style="color:var(--red);">API Error: ${data.error.message}</span>`;
+        } else {
+            outputDiv.innerText = data.candidates[0].content.parts[0].text;
+        }
+    } catch (error) {
+        outputDiv.innerHTML = `<span style="color:var(--red);">Network Error: ${error.message}</span>`;
+    } finally {
+        document.getElementById('btn-analyze').disabled = false;
+    }
+});
 </script>
 </body>
 </html>
